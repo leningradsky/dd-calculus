@@ -1,0 +1,13 @@
+v0.1-stlc-soundness
+
+Release: 2026-01-09
+Status: IMMUTABLE
+
+This version contains:
+- Full STLC soundness proof from Δ≠∅
+- Collapse theorem (D=∅ ⟹ trivial)
+- Category DD₀ formalization
+- 8 Agda modules, ~900 lines
+- 0 postulates, 0 sorry
+
+Do not modify. Future work goes to v0.2 branch.
