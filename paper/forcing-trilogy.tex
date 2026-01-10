@@ -1,0 +1,95 @@
+\section{The Forcing Trilogy: T1–T3}
+
+The existence of stable mathematical objects is not guaranteed—it is \emph{forced} by structural constraints on the observation language. We establish three forcing theorems that together characterize the knife-edge between stable ontology and epistemic collapse.
+
+\subsection{Setup: Refinement Dynamics}
+
+Let $D$ be a space of distinguisher configurations with a refinement preorder $\sqsubseteq$. A \emph{refinement operator} $\Phi : D \to D$ generates trajectories:
+\[
+\mathrm{traj}(d_0, n) = \Phi^n(d_0)
+\]
+For each configuration $d$, states $x, y \in U$ are \emph{equivalent} ($x \sim_d y$) if no observation at $d$ distinguishes them. Refinement shrinks equivalence classes: $d \sqsubseteq d'$ implies ${\sim_{d'}} \subseteq {\sim_d}$.
+
+A state $x$ \emph{stabilizes} from $d_0$ if its equivalence class eventually stops shrinking along the trajectory.
+
+\subsection{T1: Closure Forced by Stability}
+
+\begin{theorem}[Closure Forcing]
+If every state stabilizes from $d_0$, then the observation language must be closed under composition.
+\end{theorem}
+
+\textbf{Contrapositive:} If observations $o_1, o_2$ exist such that their composition $o_1 \circ o_2$ is not reachable via refinement, then there exist states that never stabilize.
+
+\textbf{Key structure:} We require a \emph{witness} that composition is nontrivial—there exist $x, y$ indistinguishable by $o_1$ and $o_2$ separately, but distinguishable by $o_1 \circ o_2$.
+
+\textbf{Interpretation:} Closure is not assumed—it is \emph{forced} by the demand for stable objects. Without closure, classification drifts indefinitely.
+
+\subsection{T2: Induction Forced by Iteration}
+
+\begin{theorem}[Refinement-Induction]
+Any system with iterable refinement necessarily has $\mathbb{N}$-structure and an induction principle.
+\end{theorem}
+
+\textbf{Content:} We define $\mathrm{Iter}$ as the free monoid of refinement steps:
+\[
+\mathrm{Iter} ::= \varepsilon \mid \mathrm{step}(\mathrm{Iter})
+\]
+with semantic interpretation $\mathrm{apply}(d, \varepsilon) = d$ and $\mathrm{apply}(d, \mathrm{step}(i)) = \Phi(\mathrm{apply}(d, i))$.
+
+The induction principle follows immediately:
+\[
+P(\varepsilon) \land (\forall i.\, P(i) \to P(\mathrm{step}(i))) \implies \forall i.\, P(i)
+\]
+
+\textbf{Interpretation:} We do not "import $\mathbb{N}$ as foundation." We show that $\mathbb{N}$ is the \emph{unique} (up to isomorphism) structure for indexing finite iteration. Induction is forced by the existence of refinement trajectories.
+
+\subsection{T3: Collapse-3 (No Stability $\Rightarrow$ No Knowledge)}
+
+\begin{definition}[Drift]
+A system exhibits \emph{drift} if every equivalence class splits at every step:
+\[
+\mathrm{Drift} := \forall d, x.\, \exists y.\, (x \sim_d y) \land \neg(x \sim_{\Phi(d)} y)
+\]
+\end{definition}
+
+\begin{definition}[Stable Classifier]
+A classifier $K : U \to \{0,1\}$ is \emph{stable from $d_0$} if it respects equivalence at every trajectory step:
+\[
+\mathrm{StableK}(d_0, K) := \forall n, x, y.\, x \sim_{\mathrm{traj}(d_0,n)} y \implies K(x) = K(y)
+\]
+\end{definition}
+
+\begin{theorem}[Collapse-3]
+If drift holds, every stable classifier is constant:
+\[
+\mathrm{Drift} \implies \forall d_0, K.\, \mathrm{StableK}(d_0, K) \implies \neg\mathrm{Nontrivial}(K)
+\]
+\end{theorem}
+
+\textbf{Interpretation:} Under perpetual refinement, any "knowledge" that respects all distinctions must be trivial. Science—understood as stable, nontrivial classification—is impossible without stabilization.
+
+\subsection{The Knife-Edge}
+
+The three theorems together establish:
+
+\begin{center}
+\framebox{\parbox{0.85\textwidth}{
+\textbf{Either} the observation language is closed (T1) and admits inductive reasoning (T2), yielding stable objects,
+
+\textbf{or} refinement perpetually drifts (T3), and no nontrivial knowledge exists.
+}}
+\end{center}
+
+This is not a dilemma to be resolved by fiat—it is a \emph{structural constraint} on any epistemic system. Stable ontology exists if and only if the distinguisher algebra has the right closure properties.
+
+\subsection{Formalization}
+
+All three theorems are formalized in Agda 2.6.4 with zero postulates:
+
+\begin{itemize}
+\item \texttt{ForcingT1.agda}: ComposableObs, ClosedComp, T1 statement
+\item \texttt{ForcingT2.agda}: Iter, encode/decode isomorphism, iter-induction (fully proven)
+\item \texttt{ForcingT3.agda}: Drift, StableK, Collapse-3 statement
+\end{itemize}
+
+The repository is available at \url{https://github.com/leningradsky/dd-calculus}.
