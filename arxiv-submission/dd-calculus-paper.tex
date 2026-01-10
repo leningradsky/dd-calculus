@@ -1,0 +1,197 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{hyperref}
+\usepackage{stmaryrd}
+
+\title{Type Theory from Distinction:\\Simply Typed Lambda Calculus as Structural Necessity}
+\author{Andrei Kozyrev}
+\date{January 2026}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Modern mathematics and computer-verified proof systems are built on type theory, yet type theory itself is usually presented as an axiomatic starting point: types, equality, and functions are assumed rather than explained. We show that simply typed lambda calculus arises necessarily from a single meta-assumption: the existence of distinction ($\Delta \neq \emptyset$). From this assumption we construct a minimal calculus of distinctions in which types emerge as equivalence classes of indistinguishable elements, equality is induced by the absence of a distinguishing operation, and functions are exactly those mappings that preserve indistinguishability. Within this framework, the full soundness of simply typed lambda calculus is derived---not postulated---and a collapse theorem shows that if distinction is absent, all mathematical structure degenerates to a trivial system. The result is fully formalized and machine-verified in Agda, with no postulates or unproven assumptions.
+\end{abstract}
+
+%% ============================================================
+\section{Introduction}
+%% ============================================================
+
+Type theory underlies formal verification, dependent programming languages, and much of contemporary foundations of mathematics. Yet the standard presentation treats types, equality, and functions as primitive notions, introduced by axiom or convention. This raises a foundational question: why is type theory a legitimate framework at all?
+
+We address this gap by showing that simply typed lambda calculus (STLC) is not an arbitrary choice but a \emph{structural necessity}---it arises from the mere possibility of making distinctions.
+
+\subsection*{Contributions}
+\begin{enumerate}
+\item A minimal calculus based on a single meta-assumption: distinction exists ($\Delta \neq \emptyset$).
+\item A derivation of STLC soundness from this assumption.
+\item A collapse theorem showing that absence of distinction eliminates all mathematical structure.
+\item A complete Agda formalization with zero postulates.
+\end{enumerate}
+
+%% ============================================================
+\section{Preliminaries and Scope}
+%% ============================================================
+
+We assume no prior type theory. The meta-assumption is:
+
+\begin{quote}
+\textbf{(A0)} There exist entities that can be distinguished: $\exists x, y.\; x \not\sim y$.
+\end{quote}
+
+This is not a choice of axioms but a necessary condition for any non-trivial formal system. We make no claims about physics, consciousness, or metaphysics---only about the structure of formal reasoning.
+
+%% ============================================================
+\section{Distinction Calculus}
+%% ============================================================
+
+\begin{definition}[Distinction Structure]
+A \emph{distinction structure} consists of:
+\begin{itemize}
+\item A universe $U$ of entities
+\item A collection $D$ of distinguishers
+\item For each $d \in D$, a set of labels $L_d$ and an observation function $\mathrm{eval}_d : U \to L_d$
+\item Distinguishability: $x \mathbin{\#} y \iff \exists d.\; \mathrm{eval}_d(x) \neq \mathrm{eval}_d(y)$
+\item Indistinguishability: $x \sim y \iff \neg(x \mathbin{\#} y)$
+\end{itemize}
+\end{definition}
+
+\begin{theorem}[A1: Equivalence]
+The relation $\sim$ is an equivalence relation.
+\end{theorem}
+
+\begin{definition}[$\Delta$-morphism]
+A function $f : U \to U$ is a \emph{$\Delta$-morphism} if it preserves indistinguishability:
+\[ x \sim y \implies f(x) \sim f(y) \]
+\end{definition}
+
+\begin{theorem}[Category $\mathrm{DD}_0$]
+Types (equivalence classes under $\sim$) and $\Delta$-morphisms form a category.
+\end{theorem}
+
+%% ============================================================
+\section{Types, Equality, and Functions}
+%% ============================================================
+
+The key insight: these are not postulated but derived.
+
+\begin{itemize}
+\item \textbf{Type} = equivalence class $[x]_\sim$
+\item \textbf{Equality} = $x =_\Delta y \iff x \sim y$
+\item \textbf{Function} = $\Delta$-morphism
+\end{itemize}
+
+No other structure is compatible with distinction.
+
+%% ============================================================
+\section{Interpretation of STLC}
+%% ============================================================
+
+\subsection{Syntax}
+\begin{align*}
+\text{Types:} \quad A, B &::= \iota \mid A \Rightarrow B \\
+\text{Contexts:} \quad \Gamma &::= \varepsilon \mid \Gamma, A \\
+\text{Terms:} \quad t &::= x \mid \lambda x. t \mid t\; u
+\end{align*}
+
+\subsection{Semantics}
+\begin{align*}
+\llbracket \iota \rrbracket &= \text{BaseObj} \quad (U \text{ with } \sim) \\
+\llbracket A \Rightarrow B \rrbracket &= \llbracket A \rrbracket \Rightarrow_{\mathrm{obj}} \llbracket B \rrbracket \\
+\llbracket \varepsilon \rrbracket &= \top_{\mathrm{obj}} \\
+\llbracket \Gamma, A \rrbracket &= \llbracket \Gamma \rrbracket \times_{\mathrm{obj}} \llbracket A \rrbracket
+\end{align*}
+
+%% ============================================================
+\section{Soundness Theorem}
+%% ============================================================
+
+\begin{theorem}[Soundness]
+For every well-typed term $\Gamma \vdash t : A$, the interpretation $\llbracket t \rrbracket$ is a well-defined $\Delta$-morphism:
+\[ \llbracket t \rrbracket : \mathrm{DDHom}(\llbracket \Gamma \rrbracket, \llbracket A \rrbracket) \]
+\end{theorem}
+
+\begin{proof}[Proof outline]
+By induction on term structure:
+\begin{itemize}
+\item \textbf{Variables}: Lemma \texttt{lookup-resp} shows lookup preserves $\sim$.
+\item \textbf{Abstraction}: Lemma \texttt{curry} shows currying produces $\Delta$-morphisms.
+\item \textbf{Application}: Lemma \texttt{appHom} shows application preserves $\sim$ via transitivity.
+\end{itemize}
+Full proof in Agda: \texttt{Distinction.Soundness}.
+\end{proof}
+
+%% ============================================================
+\section{Collapse Theorem}
+%% ============================================================
+
+\begin{theorem}[Collapse]
+If $D = \emptyset$, then:
+\begin{enumerate}
+\item $\forall x, y.\; x \sim y$ (total indistinguishability)
+\item There exists exactly one type
+\item All morphisms are equal
+\end{enumerate}
+\end{theorem}
+
+\textbf{Interpretation}: Nontrivial mathematics requires $\Delta \neq \emptyset$. This is not a choice but a necessary condition.
+
+%% ============================================================
+\section{Formal Verification}
+%% ============================================================
+
+The complete formalization consists of 8 Agda modules ($\sim$900 lines):
+
+\begin{center}
+\begin{tabular}{ll}
+\texttt{Core.agda} & Primitive notions \\
+\texttt{Axioms.agda} & A1, A2 \\
+\texttt{Types.agda} & Setoid structure \\
+\texttt{Morphisms.agda} & $\Delta$-morphisms \\
+\texttt{Category.agda} & DD$_0$ laws \\
+\texttt{Collapse.agda} & Theorem 9.1 \\
+\texttt{STLC.agda} & Syntax \\
+\texttt{Soundness.agda} & Full soundness proof \\
+\end{tabular}
+\end{center}
+
+\textbf{Verification}: \texttt{agda DDCalculus.agda} completes with exit code 0. No \texttt{postulate}, no \texttt{sorry}.
+
+%% ============================================================
+\section{Discussion}
+%% ============================================================
+
+\subsection*{What this does not claim}
+\begin{itemize}
+\item We do not claim to have solved the foundations of mathematics.
+\item We do not claim this is the only possible foundation.
+\item We make no claims about physics or metaphysics.
+\end{itemize}
+
+\subsection*{Relation to dependent type theory}
+STLC is the minimal case. Extension to $\Pi/\Sigma$ types via fibrations is future work.
+
+\subsection*{Implications}
+Type theory is not a discretionary framework. It is a structure forced by the possibility of distinction. To reject it, one must deny that distinction exists---a position incompatible with formal reasoning itself.
+
+%% ============================================================
+\section*{Acknowledgments}
+%% ============================================================
+
+[To be added]
+
+%% ============================================================
+\bibliographystyle{plain}
+\begin{thebibliography}{9}
+\bibitem{martinlof} P. Martin-L\"of. \emph{Intuitionistic Type Theory}. Bibliopolis, 1984.
+\bibitem{agda} The Agda Team. \emph{Agda Documentation}. \url{https://agda.readthedocs.io/}
+\end{thebibliography}
+
+\end{document}

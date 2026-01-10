@@ -1,0 +1,3 @@
+name: dd-calculus
+include: src
+depend: standard-library
