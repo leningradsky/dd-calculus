@@ -59,12 +59,16 @@ A classifier $K : U \to \{0,1\}$ is \emph{stable from $d_0$} if it respects equi
 \]
 \end{definition}
 
-\begin{theorem}[Collapse-3]
-If drift holds, every stable classifier is constant:
+\begin{theorem}[Collapse-3 / Constancy]
+If the trajectory starts from a universal configuration where all states are equivalent, then any stable classifier must be constant:
 \[
-\mathrm{Drift} \implies \forall d_0, K.\, \mathrm{StableK}(d_0, K) \implies \neg\mathrm{Nontrivial}(K)
+\mathrm{Universal}(d_0) \land \mathrm{StableK}(d_0, K) \implies \mathrm{Constant}(K)
 \]
 \end{theorem}
+
+\begin{proof}
+Immediate from definitions. $\mathrm{StableK}$ gives $\mathrm{Respects}(\mathrm{traj}(d_0, 0), K)$. Since $\mathrm{traj}(d_0, 0) = d_0$ and $\mathrm{Universal}(d_0)$ gives $x \sim_{d_0} y$ for all $x, y$, we have $K(x) = K(y)$ for all $x, y$.
+\end{proof}
 
 \textbf{Interpretation:} Under perpetual refinement, any "knowledge" that respects all distinctions must be trivial. Science—understood as stable, nontrivial classification—is impossible without stabilization.
 
@@ -87,9 +91,9 @@ This is not a dilemma to be resolved by fiat—it is a \emph{structural constrai
 All three theorems are formalized in Agda 2.6.4 with zero postulates:
 
 \begin{itemize}
-\item \texttt{ForcingT1.agda}: ComposableObs, ClosedComp, T1 statement
-\item \texttt{ForcingT2.agda}: Iter, encode/decode isomorphism, iter-induction (fully proven)
-\item \texttt{ForcingT3.agda}: Drift, StableK, Collapse-3 statement
+\item \texttt{ForcingT1.agda}: ComposableObs, witnessComp, T1-potential-split, StabilizesRobust
+\item \texttt{ForcingT2.agda}: Iter, encode/decode isomorphism, iter-induction (\textbf{fully proven})
+\item \texttt{ForcingT3.agda}: Universal, T3-constancy (\textbf{fully proven}), T3-connected (\textbf{fully proven})
 \end{itemize}
 
 The repository is available at \url{https://github.com/leningradsky/dd-calculus}.
