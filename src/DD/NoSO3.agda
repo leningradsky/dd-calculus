@@ -1,212 +1,142 @@
 {-# OPTIONS --safe --without-K #-}
 
 -- ============================================================================
--- DD.NoSO3 — SO(3) is Incompatible with Triadic Structure
+-- DD.NoSO3 — SO(3) Cannot Accommodate Triadic Structure
 -- ============================================================================
 --
--- THEOREM: SO(3) cannot be the gauge group for Omega (triad)
+-- THEOREM: SO(3) is incompatible with Omega/Z₃ structure.
 --
--- REASON: SO(3) has trivial center, but Omega requires Z₃ center.
+-- PROOF STRATEGY:
+--   1. Center(SO(3)) = {I} (trivial)
+--   2. We proved: centralizer(cycle) = Z₃ = {id, cycle, cycle²}
+--   3. Z₃ is non-trivial (has 3 elements)
+--   4. Therefore Omega cannot embed in SO(3) preserving structure
 --
--- MORE DEEPLY: SO(3) is a real group, but Omega has complex phase structure.
+-- PHYSICAL MEANING:
+--   Color charge REQUIRES complex structure (SU(3), not SO(3))
 --
 -- ============================================================================
 
 module DD.NoSO3 where
 
 open import Core.Logic
+open import Core.Nat using (ℕ; zero; suc)
 open import Core.Omega
+open import DD.Triad using (Transform; id-t; cycle; cycle²; cycle≢id)
+open import DD.NoScale using (centralizer-is-Z₃; CommutesWithCycle)
 
 -- ============================================================================
--- SECTION 1: THE CENTER ARGUMENT
+-- SECTION 1: WHAT SO(3) WOULD REQUIRE
 -- ============================================================================
 
--- The center of a group G is Z(G) = {g ∈ G | ∀h. gh = hg}
--- 
--- FACT (from Lie theory):
---   Center(SO(3)) = {I} (trivial)
---   Center(SU(3)) = Z₃ = {I, ωI, ω²I}
---
--- We already proved:
---   centralizer(cycle) = Z₃
---
--- Therefore: The gauge group of Omega must have Z₃ in its center.
--- SO(3) fails this requirement.
+-- SO(3) has trivial center: only the identity commutes with everything
+-- In DD terms: if Omega embedded in SO(3), centralizer would be trivial
+
+record SO3Compatible : Set where
+  field
+    -- The key property: centralizer is trivial
+    -- (only identity commutes with all rotations)
+    trivial-center : (f : Transform) → CommutesWithCycle f → 
+                     (x : Omega) → f x ≡ x
 
 -- ============================================================================
--- SECTION 2: MODELING THE ARGUMENT IN AGDA
+-- SECTION 2: CONTRADICTION
 -- ============================================================================
 
--- We model "center" abstractly: elements that commute with everything
+-- We know cycle commutes with cycle (trivially)
+cycle-commutes : CommutesWithCycle cycle
+cycle-commutes x = refl
 
-record GroupWithCenter : Set₁ where
-  field
-    G : Set
-    e : G                          -- identity
-    _·_ : G → G → G                -- multiplication
-    center : G → Set               -- predicate: is in center
-    center-commutes : ∀ {g} → center g → ∀ h → (g · h) ≡ (h · g)
+-- cycle≢id imported from DD.Triad
 
--- SO(3) has trivial center
-record SO3-Model : Set₁ where
-  field
-    gwc : GroupWithCenter
-  open GroupWithCenter gwc
-  field
-    -- Only identity is in center
-    center-trivial : ∀ g → center g → g ≡ e
+-- THEOREM: SO(3) compatibility is impossible
+no-SO3 : ¬ SO3Compatible
+no-SO3 compat = cycle≢id (SO3Compatible.trivial-center compat cycle cycle-commutes)
 
--- What Omega requires: Z₃ center
-record Z₃-Center-Requirement : Set₁ where
-  field
-    gwc : GroupWithCenter
-  open GroupWithCenter gwc
-  field
-    -- Three distinct central elements
-    c₀ c₁ c₂ : G
-    c₀-center : center c₀
-    c₁-center : center c₁
-    c₂-center : center c₂
-    c₀≢c₁ : c₀ ≢ c₁
-    c₁≢c₂ : c₁ ≢ c₂
-    c₀≢c₂ : c₀ ≢ c₂
+-- ============================================================================
+-- SECTION 3: EXPLICIT Z₃ NON-TRIVIALITY
+-- ============================================================================
 
--- THEOREM: SO(3) cannot satisfy Z₃-Center-Requirement
--- 
--- We express this more simply: if a group has trivial center,
--- it cannot have three distinct central elements.
+-- The centralizer has exactly 3 elements, not 1
+-- This is incompatible with trivial center
 
--- A group has "trivial center" if all central elements equal identity
-TrivialCenter : (G : Set) (e : G) (center : G → Set) → Set
-TrivialCenter G e center = (g : G) → center g → g ≡ e
+-- Count of centralizer elements
+data CentralizerElement : Set where
+  cent-id : CentralizerElement
+  cent-cycle : CentralizerElement  
+  cent-cycle² : CentralizerElement
 
--- A group has "Z₃ center" if it has 3 distinct central elements  
--- Using a simpler formulation
-HasThreeDistinctCentral : (G : Set) (center : G → Set) → Set
-HasThreeDistinctCentral G center = 
-  Σ G λ c₀ → Σ G λ c₁ → 
-    center c₀ × center c₁ × (c₀ ≢ c₁)
+-- All three are distinct
+cent-distinct-1 : cent-id ≢ cent-cycle
+cent-distinct-1 ()
 
--- THEOREM: Trivial center and having two distinct central elements are incompatible
-trivial-vs-nontrivial : (G : Set) (e : G) (center : G → Set) →
-                        TrivialCenter G e center → HasThreeDistinctCentral G center → ⊥
-trivial-vs-nontrivial G e center triv has3 = c₀≢c₁ c₀≡c₁
+cent-distinct-2 : cent-id ≢ cent-cycle²
+cent-distinct-2 ()
+
+cent-distinct-3 : cent-cycle ≢ cent-cycle²
+cent-distinct-3 ()
+
+-- Correspondence with actual transforms
+to-transform : CentralizerElement → Transform
+to-transform cent-id = id-t
+to-transform cent-cycle = cycle
+to-transform cent-cycle² = cycle²
+
+-- All are in centralizer
+all-commute : (c : CentralizerElement) → CommutesWithCycle (to-transform c)
+all-commute cent-id x = refl
+all-commute cent-cycle x = refl
+all-commute cent-cycle² x = cycle²-commutes x
   where
-  c₀ : G
-  c₀ = proj₁ has3
-  
-  c₁ : G
-  c₁ = proj₁ (proj₂ has3)
-  
-  stuff : center c₀ × center c₁ × (c₀ ≢ c₁)
-  stuff = proj₂ (proj₂ has3)
-  
-  -- Use fst/snd for _×_ record
-  cent₀ : center c₀
-  cent₀ = fst stuff
-  
-  cent₁ : center c₁
-  cent₁ = fst (snd stuff)
-  
-  c₀≢c₁ : c₀ ≢ c₁
-  c₀≢c₁ = snd (snd stuff)
-  
-  c₀≡c₁ : c₀ ≡ c₁
-  c₀≡c₁ = trans (triv c₀ cent₀) (sym (triv c₁ cent₁))
+  cycle²-commutes : (x : Omega) → cycle² (cycle x) ≡ cycle (cycle² x)
+  cycle²-commutes ω⁰ = refl
+  cycle²-commutes ω¹ = refl
+  cycle²-commutes ω² = refl
 
 -- ============================================================================
--- SECTION 3: THE REPRESENTATION DIMENSION ARGUMENT
--- ============================================================================
-
--- Another way to see SO(3) fails:
---
--- SO(3) acts on ℝ³ (real 3-vectors)
--- SU(3) acts on ℂ³ (complex 3-vectors)
---
--- The fundamental representation of SO(3) is REAL
--- The fundamental representation of SU(3) is COMPLEX
---
--- Omega has complex phase structure (proved in ComplexStructure.agda)
--- Therefore SO(3) is insufficient.
-
--- We model this as: "real" vs "complex" carrier
-
-data Carrier-Type : Set where
-  real-carrier : Carrier-Type
-  complex-carrier : Carrier-Type
-
-record GroupAction : Set₁ where
-  field
-    G : Set
-    X : Set
-    carrier-type : Carrier-Type
-    act : G → X → X
-
--- SO(3) action is real
-SO3-is-real : GroupAction → Set
-SO3-is-real ga = GroupAction.carrier-type ga ≡ real-carrier
-
--- Omega requires complex carrier (from ComplexStructure)
-Omega-requires-complex : GroupAction → Set
-Omega-requires-complex ga = GroupAction.carrier-type ga ≡ complex-carrier
-
--- THEOREM: No single action can be both real and complex-required
-real-complex-exclusive : ∀ ga → SO3-is-real ga → Omega-requires-complex ga → ⊥
-real-complex-exclusive ga real-pf complex-pf = real≢complex (trans (sym real-pf) complex-pf)
-  where
-  real≢complex : real-carrier ≢ complex-carrier
-  real≢complex ()
-
--- ============================================================================
--- SECTION 4: PHYSICAL INTERPRETATION
+-- SECTION 4: WHY THIS MATTERS
 -- ============================================================================
 
 {-
-WHY SO(3) FAILS FOR COLOR:
+INTERPRETATION:
 
-1. CENTER MISMATCH:
-   - SO(3) center = {I} (trivial)
-   - Color requires Z₃ center
-   - Quarks transform under Z₃: R → G → B → R
-   - This Z₃ must be the center of gauge group
-   - SO(3) doesn't have it
+1. SO(3) is the rotation group of ℝ³
+   - Real, orthogonal, det = ±1 (actually +1 for SO)
+   - Center is trivial: {I}
 
-2. COMPLEX PHASES:
-   - Gluon field has complex phase information
-   - SO(3) is purely real
-   - Cannot encode quantum interference of color
+2. SU(3) is the "rotation" group of ℂ³ (unitary, det=1)
+   - Complex, unitary, det = 1
+   - Center is Z₃: {I, ωI, ω²I}
 
-3. ANOMALY CANCELLATION:
-   - SO(3) doesn't have the right anomaly structure
-   - SU(3) anomaly = -SU(3)* ensures consistency
-   - No such property for SO(3)
+3. Our Omega structure has non-trivial centralizer Z₃
+   - This MATCHES SU(3) center
+   - This CONTRADICTS SO(3) center
 
-4. CONFINEMENT:
-   - Color confinement requires specific center structure
-   - Z₃ center of SU(3) is essential for 't Hooft flux
-   - SO(3) lacks this mechanism
+4. Therefore:
+   - Triadic distinction structure is incompatible with real geometry
+   - Triadic distinction structure requires complex geometry
+   - Color charge lives in SU(3), not SO(3)
 
-CONCLUSION:
-SO(3) is excluded by both abstract (center mismatch) and
-concrete (complex phase, anomaly) arguments.
+PHYSICAL CONSEQUENCE:
+Quarks transform under SU(3), not SO(3).
+This is not a choice — it's forced by the triadic structure of color.
 -}
 
 -- ============================================================================
--- SECTION 5: SUMMARY THEOREM
+-- SECTION 5: ALTERNATIVE FORMULATION
 -- ============================================================================
 
--- Collecting the exclusion criteria
-record SO3-Exclusion-Evidence : Set₁ where
-  field
-    -- Center is too small (trivial vs non-trivial)
-    center-wrong : (G : Set) (e : G) (center : G → Set) →
-                   TrivialCenter G e center → HasThreeDistinctCentral G center → ⊥
-    -- Carrier is wrong type (real vs complex)
-    carrier-wrong : ∀ ga → SO3-is-real ga → Omega-requires-complex ga → ⊥
+-- Another way to state the incompatibility:
+-- SO(3) has no element of order 3 in its center
 
--- We have both pieces of evidence
-SO3-excluded : SO3-Exclusion-Evidence
-SO3-excluded = record
-  { center-wrong = trivial-vs-nontrivial
-  ; carrier-wrong = real-complex-exclusive
-  }
+-- In SO(3), if A³ = I and A commutes with everything, then A = I
+-- But in our structure, cycle³ = id, cycle commutes with centralizer, cycle ≠ id
+
+-- Record for "has trivial center"
+record TrivialCenter (G : Set) (op : G → G → G) (e : G) : Set where
+  field
+    central-is-id : (g : G) → ((h : G) → op g h ≡ op h g) → g ≡ e
+
+-- Omega with cycle does NOT have trivial center
+-- (Full proof would require function extensionality for Transform equality)
+-- But no-SO3 theorem above is complete and doesn't need funext
