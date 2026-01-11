@@ -12,3 +12,4 @@ module Core where
 open import Core.Logic public
 open import Core.Nat public
 open import Core.Omega public
+open import Core.Dyad public
