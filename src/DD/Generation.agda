@@ -11,49 +11,74 @@ open import Core.Nat using (ℕ; zero; suc; _+_)
 open import Core.Omega
 
 -- ============================================================================
--- SECTION 1: CP PHASE COUNT
+-- SECTION 1: GENERATION INDEX
 -- ============================================================================
 
-cp-phases : ℕ -> ℕ
-cp-phases zero = zero
-cp-phases (suc zero) = zero
-cp-phases (suc (suc zero)) = zero
-cp-phases (suc (suc (suc zero))) = suc zero
-cp-phases (suc (suc (suc (suc n)))) = suc (suc (suc n))
+data Gen : Set where
+  gen1 : Gen  -- (u, d, e, ve)
+  gen2 : Gen  -- (c, s, mu, vmu)
+  gen3 : Gen  -- (t, b, tau, vtau)
 
-two-gen-no-cp : cp-phases 2 ≡ 0
-two-gen-no-cp = refl
-
-three-gen-one-cp : cp-phases 3 ≡ 1
-three-gen-one-cp = refl
+gen-count : ℕ
+gen-count = 3
 
 -- ============================================================================
--- SECTION 2: CP REQUIREMENT
+-- SECTION 2: GENERATION = OMEGA ISOMORPHISM
 -- ============================================================================
 
-HasCP : ℕ -> Set
-HasCP n = cp-phases n ≡ zero -> ⊥
+gen-to-omega : Gen -> Omega
+gen-to-omega gen1 = ω⁰
+gen-to-omega gen2 = ω¹
+gen-to-omega gen3 = ω²
 
-one-no-cp : HasCP 1 -> ⊥
-one-no-cp h = h refl
+omega-to-gen : Omega -> Gen
+omega-to-gen ω⁰ = gen1
+omega-to-gen ω¹ = gen2
+omega-to-gen ω² = gen3
 
-two-no-cp : HasCP 2 -> ⊥
-two-no-cp h = h refl
+gen-omega-gen : (g : Gen) -> omega-to-gen (gen-to-omega g) ≡ g
+gen-omega-gen gen1 = refl
+gen-omega-gen gen2 = refl
+gen-omega-gen gen3 = refl
 
-three-has-cp : HasCP 3
-three-has-cp ()
+omega-gen-omega : (w : Omega) -> gen-to-omega (omega-to-gen w) ≡ w
+omega-gen-omega ω⁰ = refl
+omega-gen-omega ω¹ = refl
+omega-gen-omega ω² = refl
+
+-- Isomorphism record
+record Iso (A B : Set) : Set where
+  field
+    to : A -> B
+    from : B -> A
+    to-from : (x : A) -> from (to x) ≡ x
+    from-to : (y : B) -> to (from y) ≡ y
+
+Gen-iso-Omega : Iso Gen Omega
+Gen-iso-Omega = record
+  { to = gen-to-omega
+  ; from = omega-to-gen
+  ; to-from = gen-omega-gen
+  ; from-to = omega-gen-omega
+  }
 
 -- ============================================================================
--- SECTION 3: GENERATION INDEX = OMEGA
+-- SECTION 3: GENERATION ACTION (CYCLIC)
 -- ============================================================================
 
-GenerationIndex : Set
-GenerationIndex = Omega
+next-gen : Gen -> Gen
+next-gen gen1 = gen2
+next-gen gen2 = gen3
+next-gen gen3 = gen1
 
-gen1 gen2 gen3 : GenerationIndex
-gen1 = ω⁰
-gen2 = ω¹
-gen3 = ω²
+next-gen-three : (g : Gen) -> next-gen (next-gen (next-gen g)) ≡ g
+next-gen-three gen1 = refl
+next-gen-three gen2 = refl
+next-gen-three gen3 = refl
+
+-- ============================================================================
+-- SECTION 4: DISTINCTNESS
+-- ============================================================================
 
 gen1-ne-gen2 : gen1 ≢ gen2
 gen1-ne-gen2 ()
@@ -65,127 +90,18 @@ gen2-ne-gen3 : gen2 ≢ gen3
 gen2-ne-gen3 ()
 
 -- ============================================================================
--- SECTION 4: WHY NOT 2 GENERATIONS
--- ============================================================================
-
-data TwoGen : Set where
-  g1 g2 : TwoGen
-
--- Pigeonhole: 3 elements cannot map injectively to 2
--- This is already proven in NoOmegaIn2D, we just reference the concept
-
--- For 2 generations: CKM is 2x2 real matrix, no CP phase
--- This is captured by cp-phases 2 = 0
-
--- ============================================================================
--- SECTION 5: MAIN THEOREM
--- ============================================================================
-
--- GenerationIndex IS Omega (by definition)
--- This is not a theorem but a definition: GenerationIndex = Omega
-
--- CP facts combined
-record CPFacts : Set where
-  field
-    cp-at-3 : cp-phases 3 ≡ suc zero
-    cp-at-2 : cp-phases 2 ≡ zero
-    cp-at-1 : cp-phases 1 ≡ zero
-
-SM-CPFacts : CPFacts
-SM-CPFacts = record
-  { cp-at-3 = refl
-  ; cp-at-2 = refl
-  ; cp-at-1 = refl
-  }
-
--- ============================================================================
--- SECTION 6: PARTICLE FLAVORS
--- ============================================================================
-
-data QuarkFlavor : Set where
-  up down charm strange top bottom : QuarkFlavor
-
-quark-gen : QuarkFlavor -> GenerationIndex
-quark-gen up = gen1
-quark-gen down = gen1
-quark-gen charm = gen2
-quark-gen strange = gen2
-quark-gen top = gen3
-quark-gen bottom = gen3
-
-data LeptonFlavor : Set where
-  electron e-neutrino muon mu-neutrino tau tau-neutrino : LeptonFlavor
-
-lepton-gen : LeptonFlavor -> GenerationIndex
-lepton-gen electron = gen1
-lepton-gen e-neutrino = gen1
-lepton-gen muon = gen2
-lepton-gen mu-neutrino = gen2
-lepton-gen tau = gen3
-lepton-gen tau-neutrino = gen3
-
--- ============================================================================
--- SECTION 7: GENERATION COUNT
--- ============================================================================
-
--- Count elements
-data Fin : ℕ -> Set where
-  fzero : {n : ℕ} -> Fin (suc n)
-  fsuc : {n : ℕ} -> Fin n -> Fin (suc n)
-
--- Omega has 3 elements
-omega-to-fin3 : Omega -> Fin 3
-omega-to-fin3 ω⁰ = fzero
-omega-to-fin3 ω¹ = fsuc fzero
-omega-to-fin3 ω² = fsuc (fsuc fzero)
-
-fin3-to-omega : Fin 3 -> Omega
-fin3-to-omega fzero = ω⁰
-fin3-to-omega (fsuc fzero) = ω¹
-fin3-to-omega (fsuc (fsuc fzero)) = ω²
-fin3-to-omega (fsuc (fsuc (fsuc ())))
-
--- Round-trip
-omega-fin-omega : (x : Omega) -> fin3-to-omega (omega-to-fin3 x) ≡ x
-omega-fin-omega ω⁰ = refl
-omega-fin-omega ω¹ = refl
-omega-fin-omega ω² = refl
-
--- THEOREM: Generation count = 3
-generation-count : ℕ
-generation-count = 3
-
--- ============================================================================
--- SECTION 8: INTERPRETATION
+-- SECTION 5: INTERPRETATION
 -- ============================================================================
 
 {-
-WHAT THIS PROVES:
+WHY GENERATIONS = OMEGA:
 
-1. CP phases formula: (n-1)(n-2)/2 for n generations
-2. n=1,2: zero phases (no CP violation)
-3. n=3: one phase (minimal CP violation)
-4. Generation index = Omega (3 elements)
+The same structure (Omega/triad) appears at TWO levels:
+- Level 1: Color charge (SU(3) from triadic closure)
+- Level 2: Generation index (family replication)
 
-PHYSICAL MEANING:
+Both layers inherit the same fundamental structure (Omega)
+because thats what DD produces at any level.
 
-- 3 generations is MINIMAL for CP violation
-- CP violation needed for baryogenesis
-- Therefore 3 generations is structurally necessary
-
-DD INTERPRETATION:
-
-- Color = Omega acting on carrier (SU(3))
-- Generation = Omega as family index
-- Same structure, different level
-- "3" in SM is Omega appearing twice
-
-CONNECTION TO EARLIER RESULTS:
-
-- NoOmegaIn2D: Omega needs 3D carrier (for color)
-- Generation: Omega needs 3 generations (for CP)
-- Both are manifestations of the same minimality
-
-The number 3 is not arbitrary - it is the minimal
-nontrivial cyclic structure supporting complex phase.
+Gen = Omega at meta-level (distinction of distinctions)
 -}
