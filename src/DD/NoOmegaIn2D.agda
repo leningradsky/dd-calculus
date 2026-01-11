@@ -37,15 +37,25 @@ pigeonhole b a b = inj₂ (inj₁ refl)
 pigeonhole b b _ = inj₁ refl
 
 -- ============================================================================
--- MAIN THEOREM
+-- MAIN THEOREM (using explicit records)
 -- ============================================================================
 
-no-inj-omega-to-2D : ¬ (Σ (Omega → TwoD) λ f → 
-                         (f ω⁰ ≢ f ω¹) × (f ω⁰ ≢ f ω²) × (f ω¹ ≢ f ω²))
-no-inj-omega-to-2D (f , ne01 , ne02 , ne12) with pigeonhole (f ω⁰) (f ω¹) (f ω²)
-... | inj₁ eq = ne01 eq
-... | inj₂ (inj₁ eq) = ne02 eq
-... | inj₂ (inj₂ eq) = ne12 eq
+-- Record for injective triple
+record InjectiveTriple (f : Omega → TwoD) : Set where
+  field
+    ne01 : f ω⁰ ≢ f ω¹
+    ne02 : f ω⁰ ≢ f ω²
+    ne12 : f ω¹ ≢ f ω²
+
+-- Main theorem
+no-inj-omega-to-2D : ¬ (Σ (Omega → TwoD) InjectiveTriple)
+no-inj-omega-to-2D p = helper (Σ.proj₁ p) (Σ.proj₂ p)
+  where
+    helper : (f : Omega → TwoD) → InjectiveTriple f → ⊥
+    helper f inj with pigeonhole (f ω⁰) (f ω¹) (f ω²)
+    ... | inj₁ eq = InjectiveTriple.ne01 inj eq
+    ... | inj₂ (inj₁ eq) = InjectiveTriple.ne02 inj eq
+    ... | inj₂ (inj₂ eq) = InjectiveTriple.ne12 inj eq
 
 -- ============================================================================
 -- ALTERNATIVE FORMULATION
@@ -55,16 +65,19 @@ Injective : {A B : Set} → (A → B) → Set
 Injective {A} f = ∀ x y → f x ≡ f y → x ≡ y
 
 no-omega-in-2D : ¬ (Σ (Omega → TwoD) Injective)
-no-omega-in-2D (f , inj) = no-inj-omega-to-2D (f , ne01 , ne02 , ne12)
+no-omega-in-2D p = no-inj-omega-to-2D (Σ.proj₁ p , record { ne01 = ne01 ; ne02 = ne02 ; ne12 = ne12 })
   where
-  ne01 : f ω⁰ ≢ f ω¹
-  ne01 eq = ω⁰≢ω¹ (inj ω⁰ ω¹ eq)
+    f = Σ.proj₁ p
+    inj = Σ.proj₂ p
+    
+    ne01 : f ω⁰ ≢ f ω¹
+    ne01 eq = ω⁰≢ω¹ (inj ω⁰ ω¹ eq)
   
-  ne02 : f ω⁰ ≢ f ω²
-  ne02 eq = ω⁰≢ω² (inj ω⁰ ω² eq)
+    ne02 : f ω⁰ ≢ f ω²
+    ne02 eq = ω⁰≢ω² (inj ω⁰ ω² eq)
   
-  ne12 : f ω¹ ≢ f ω²
-  ne12 eq = ω¹≢ω² (inj ω¹ ω² eq)
+    ne12 : f ω¹ ≢ f ω²
+    ne12 eq = ω¹≢ω² (inj ω¹ ω² eq)
 
 -- ============================================================================
 -- INTERPRETATION
