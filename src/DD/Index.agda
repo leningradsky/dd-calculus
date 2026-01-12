@@ -70,6 +70,9 @@ import DD.YukawaParameters as YukParam
 import DD.MassHierarchy as MassH
 import DD.NeutrinoStructure as Neutrino
 
+-- Mass diagonalization (CKM/PMNS as mismatch)
+import DD.MassDiagonalization as MassDiag
+
 -- ============================================================================
 -- MASTER RECORD: The Complete DD → SM Derivation
 -- ============================================================================
@@ -110,6 +113,9 @@ record DDtoSM : Set where
     yukawaParams : YukParam.YukawaParameterCount
     massH : MassH.MassHierarchyStructure
     neutrino : Neutrino.NeutrinoStructure
+    
+    -- MASS DIAGONALIZATION (CKM/PMNS as mismatch)
+    diagMismatch : MassDiag.MassDiagTheorem
 
 -- ============================================================================
 -- INSTANTIATION
@@ -138,6 +144,7 @@ ddtoSM = record
   ; yukawaParams = YukParam.yukawa-parameter-count
   ; massH = MassH.mass-hierarchy-structure
   ; neutrino = Neutrino.neutrino-structure
+  ; diagMismatch = MassDiag.mass-diag-theorem
   }
 
 -- ============================================================================
@@ -164,13 +171,14 @@ open YukClass public using (YukawaClassification; yukawa-classification)
 open YukParam public using (YukawaParameterCount; yukawa-parameter-count)
 open MassH public using (MassHierarchyStructure; mass-hierarchy-structure)
 open Neutrino public using (NeutrinoStructure; neutrino-structure)
+open MassDiag public using (MassDiagTheorem; mass-diag-theorem)
 
 -- ============================================================================
 -- STATISTICS
 -- ============================================================================
 
 theorem-count : ℕ
-theorem-count = 22
+theorem-count = 23
 
 {-
 THE DD → SM DERIVATION IS COMPLETE.
