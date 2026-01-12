@@ -50,6 +50,9 @@ import DD.HiggsDoubletUnique as Higgs
 import DD.ElectricCharge as Charge
 import DD.PhotonMassless as Photon
 import DD.MassRatio as Mass
+import DD.RhoParameter as Rho
+import DD.GoldstoneCounting as Goldstone
+import DD.CustodialSymmetry as Custodial
 
 -- ============================================================================
 -- RE-EXPORT KEY RESULTS
@@ -68,6 +71,9 @@ open Higgs public using (HiggsRepUnique; higgs-rep-unique; HiggsField; higgs-fie
 open Charge public using (ElectricChargeFormula; electric-charge-formula)
 open Photon public using (PhotonMassless; photon-massless)
 open Mass public using (MassRatioTheorem; mass-ratio-theorem)
+open Rho public using (RhoParameter; rho-parameter)
+open Goldstone public using (GoldstoneCounting; goldstone-counting)
+open Custodial public using (CustodialSymmetry; custodial-symmetry)
 
 -- ============================================================================
 -- SUMMARY: What DD Derives
