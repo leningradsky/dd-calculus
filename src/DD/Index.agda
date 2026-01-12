@@ -29,6 +29,7 @@ import Core.OmegaTriadic as OmegaTriadic
 import DD.SU3Unique as SU3
 import DD.SU2Unique as SU2
 import DD.GaugeStructure as Gauge
+import DD.TriadToGauge as T2G
 
 -- Representations and anomalies
 import DD.Representations as Rep
@@ -81,6 +82,9 @@ import DD.MassDiagonalization as MassDiag
 import DD.TimeOrdering as Time
 import DD.CausalStructure as Causal
 import DD.Spacetime31 as ST
+
+-- Complete derivation chain
+import DD.DerivationChain as Chain
 
 -- ============================================================================
 -- MASTER RECORD: The Complete DD → SM Derivation
