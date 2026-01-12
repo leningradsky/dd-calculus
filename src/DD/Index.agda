@@ -30,6 +30,7 @@ import DD.SU3Unique as SU3
 import DD.SU2Unique as SU2
 import DD.GaugeStructure as Gauge
 import DD.TriadToGauge as T2G
+import DD.ForcingToGauge as F2G
 
 -- Representations and anomalies
 import DD.Representations as Rep
@@ -58,6 +59,7 @@ import DD.RGRunning as RG
 import DD.RGBounds as RGBnd
 import DD.RGIntegration as RGInt
 import DD.WeinbergAtMZ as WMZ
+import DD.NumericalValidation as NumVal
 
 -- Higgs mechanism
 import DD.YukawaInvariance as Yukawa
