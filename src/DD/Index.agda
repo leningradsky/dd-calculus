@@ -86,6 +86,9 @@ import DD.Spacetime31 as ST
 -- Complete derivation chain
 import DD.DerivationChain as Chain
 
+-- Numerical validation
+import DD.Validation as Valid
+
 -- ============================================================================
 -- MASTER RECORD: The Complete DD → SM Derivation
 -- ============================================================================
