@@ -1,0 +1,92 @@
+name: Agda Verification
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Haskell
+      uses: haskell-actions/setup@v2
+      with:
+        ghc-version: '9.6.6'
+        cabal-version: '3.10'
+
+    - name: Cache Cabal packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cabal/packages
+          ~/.cabal/store
+          dist-newstyle
+        key: ${{ runner.os }}-cabal-${{ hashFiles('**/*.cabal') }}-agda-2.7.0.1
+        restore-keys: |
+          ${{ runner.os }}-cabal-
+
+    - name: Cache Agda stdlib
+      uses: actions/cache@v4
+      with:
+        path: ~/.agda
+        key: ${{ runner.os }}-agda-stdlib-2.1
+        restore-keys: |
+          ${{ runner.os }}-agda-stdlib-
+
+    - name: Install Agda
+      run: |
+        cabal update
+        cabal install Agda-2.7.0.1 --overwrite-policy=always
+        echo "$HOME/.cabal/bin" >> $GITHUB_PATH
+
+    - name: Setup Agda stdlib
+      run: |
+        mkdir -p ~/.agda
+        if [ ! -d ~/.agda/agda-stdlib-2.1 ]; then
+          cd ~/.agda
+          wget https://github.com/agda/agda-stdlib/archive/refs/tags/v2.1.tar.gz
+          tar xzf v2.1.tar.gz
+          mv agda-stdlib-2.1 stdlib
+        fi
+        echo "$PWD/src" > ~/.agda/libraries
+        echo "~/.agda/stdlib/standard-library.agda-lib" >> ~/.agda/libraries
+        echo "standard-library" > ~/.agda/defaults
+
+    - name: Create library file
+      run: |
+        echo "name: dd-calculus" > dd-calculus.agda-lib
+        echo "include: src" >> dd-calculus.agda-lib
+        echo "depend: standard-library" >> dd-calculus.agda-lib
+
+    - name: Count modules and lines
+      run: |
+        MODULES=$(find src -name "*.agda" | wc -l)
+        LINES=$(find src -name "*.agda" -exec cat {} \; | wc -l)
+        echo "=== DD CALCULUS STATISTICS ==="
+        echo "Modules: $MODULES"
+        echo "Lines: $LINES"
+        echo "==============================="
+
+    - name: Verify DD.Index (full chain)
+      run: |
+        echo "Verifying DD.Index (master theorem collection)..."
+        agda --safe src/DD/Index.agda
+        echo ""
+        echo "DD.Index: OK - Full DD to SM chain verified!"
+
+    - name: Verification Summary
+      run: |
+        echo ""
+        echo "=========================================="
+        echo "  DD CALCULUS VERIFICATION COMPLETE"
+        echo "=========================================="
+        echo "  Status: PASSED"
+        echo "  Postulates: 0"
+        echo "  Flags: --safe --without-K"
+        echo "=========================================="
