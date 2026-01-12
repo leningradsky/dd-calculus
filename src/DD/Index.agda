@@ -23,6 +23,9 @@ import DD.Triad as T
 import DD.Dyad as D
 import DD.Monad as M
 import Distinction.ForcingTriad as Forcing
+import Distinction.ForcingDyad as ForcingD
+import Distinction.ForcingMonad as ForcingM
+import Distinction.GaugeFromDistinction as GFD
 import Core.OmegaTriadic as OmegaTriadic
 
 -- Gauge group uniqueness
@@ -31,6 +34,7 @@ import DD.SU2Unique as SU2
 import DD.GaugeStructure as Gauge
 import DD.TriadToGauge as T2G
 import DD.ForcingToGauge as F2G
+import DD.SU3FromForcing as SU3F
 
 -- Representations and anomalies
 import DD.Representations as Rep
