@@ -23,6 +23,7 @@ import DD.Triad as T
 import DD.Dyad as D
 import DD.Monad as M
 import Distinction.ForcingTriad as Forcing
+import Core.OmegaTriadic as OmegaTriadic
 
 -- Gauge group uniqueness
 import DD.SU3Unique as SU3
