@@ -75,6 +75,11 @@ import DD.NeutrinoStructure as Neutrino
 -- Mass diagonalization (CKM/PMNS as mismatch)
 import DD.MassDiagonalization as MassDiag
 
+-- Spacetime structure
+import DD.TimeOrdering as Time
+import DD.CausalStructure as Causal
+import DD.Spacetime31 as ST
+
 -- ============================================================================
 -- MASTER RECORD: The Complete DD → SM Derivation
 -- ============================================================================
@@ -120,6 +125,10 @@ record DDtoSM : Set where
     
     -- MASS DIAGONALIZATION (CKM/PMNS as mismatch)
     diagMismatch : MassDiag.MassDiagTheorem
+    
+    -- SPACETIME 3+1
+    timeOrder : Time.ArrowOfTime
+    spacetime : ST.Spacetime31
 
 -- ============================================================================
 -- INSTANTIATION
@@ -151,6 +160,8 @@ ddtoSM = record
   ; massH = MassH.mass-hierarchy-structure
   ; neutrino = Neutrino.neutrino-structure
   ; diagMismatch = MassDiag.mass-diag-theorem
+  ; timeOrder = Time.arrow-of-time
+  ; spacetime = ST.spacetime31
   }
 
 -- ============================================================================
@@ -180,13 +191,15 @@ open YukParam public using (YukawaParameterCount; yukawa-parameter-count)
 open MassH public using (MassHierarchyStructure; mass-hierarchy-structure)
 open Neutrino public using (NeutrinoStructure; neutrino-structure)
 open MassDiag public using (MassDiagTheorem; mass-diag-theorem)
+open Time public using (ArrowOfTime; arrow-of-time)
+open ST public using (Spacetime31; spacetime31)
 
 -- ============================================================================
 -- STATISTICS
 -- ============================================================================
 
 theorem-count : ℕ
-theorem-count = 25
+theorem-count = 27
 
 {-
 THE DD → SM DERIVATION IS COMPLETE.
