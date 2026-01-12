@@ -54,6 +54,13 @@ import DD.RhoParameter as Rho
 import DD.GoldstoneCounting as Goldstone
 import DD.CustodialSymmetry as Custodial
 
+-- Additional Yukawa/Mass modules
+import DD.YukawaClassification as YukClass
+import DD.YukawaParameters as YukParam
+import DD.MassHierarchy as MassH
+import DD.NeutrinoStructure as Neutrino
+import DD.RGBounds as RGBnd
+
 -- ============================================================================
 -- RE-EXPORT KEY RESULTS
 -- ============================================================================
@@ -75,13 +82,20 @@ open Rho public using (RhoParameter; rho-parameter)
 open Goldstone public using (GoldstoneCounting; goldstone-counting)
 open Custodial public using (CustodialSymmetry; custodial-symmetry)
 
+-- Yukawa/Mass structure
+open YukClass public using (YukawaClassification; yukawa-classification)
+open YukParam public using (YukawaParameterCount; yukawa-parameter-count)
+open MassH public using (MassHierarchyStructure; mass-hierarchy-structure)
+open Neutrino public using (NeutrinoStructure; neutrino-structure)
+open RGBnd public using (RGBoundsTheorem; rg-bounds-theorem)
+
 -- ============================================================================
 -- SUMMARY: What DD Derives
 -- ============================================================================
 
 -- Count of main structural results
 structural-results : ℕ
-structural-results = 14
+structural-results = 19
 
 {-
 DERIVED FROM Δ ≠ ∅:
