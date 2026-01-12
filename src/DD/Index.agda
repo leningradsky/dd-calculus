@@ -120,7 +120,7 @@ record DDtoSM : Set where
     -- YUKAWA/MASS
     yukawaClass : YukClass.YukawaClassification
     yukawaParams : YukParam.YukawaParameterCount
-    massH : MassH.MassHierarchyStructure
+    massH : MassH.MassHierarchyTheorem
     neutrino : Neutrino.NeutrinoStructure
     
     -- MASS DIAGONALIZATION (CKM/PMNS as mismatch)
@@ -157,7 +157,7 @@ ddtoSM = record
   ; massRatio = Mass.mass-ratio-theorem
   ; yukawaClass = YukClass.yukawa-classification
   ; yukawaParams = YukParam.yukawa-parameter-count
-  ; massH = MassH.mass-hierarchy-structure
+  ; massH = MassH.mass-hierarchy-theorem
   ; neutrino = Neutrino.neutrino-structure
   ; diagMismatch = MassDiag.mass-diag-theorem
   ; timeOrder = Time.arrow-of-time

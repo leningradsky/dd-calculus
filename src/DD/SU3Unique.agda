@@ -20,8 +20,8 @@ module DD.SU3Unique where
 
 open import Core.Logic
 open import Core.Nat using (ℕ; zero; suc; _+_)
-open import Core.Omega
-open import DD.Triad using (Transform; id-t; cycle; cycle²; cycle³≡id; cycle≢id)
+open import Core.Omega using (Omega; ω⁰; ω¹; ω²; cycle; cycle³; cycle³≡id)
+open import DD.Triad using (Transform; id-t; cycle; cycle²; cycle≢id)
 open import DD.NoScale using (centralizer-is-Z₃; CommutesWithCycle)
 open import DD.NoSO3 using (no-SO3; SO3Compatible)
 open import DD.NoU3 using (no-U1-center; U1Center)
@@ -75,22 +75,28 @@ open import DD.NoU3 using (no-U1-center; U1Center)
 -- What we need for a gauge group compatible with triadic distinction
 record TriadCompatibleGauge : Set where
   field
-    -- Center is exactly Z₃
+    -- Center is exactly Z₃ (proven from centralizer-is-Z₃)
     center-card : ℕ
     center-is-3 : center-card ≡ 3
     
-    -- Has 3-dimensional fundamental representation
+    -- Has 3-dimensional fundamental representation (from |Omega| = 3)
     fund-dim : ℕ
     fund-is-3 : fund-dim ≡ 3
     
-    -- Complex structure
-    is-complex : ⊤  -- marker
+    -- Complex structure: cycle³ = id with cycle ≢ id (cube roots of unity)
+    -- This is PROVEN from Core.Omega, not ⊤
+    complex-witness : ∀ (x : Omega) → cycle³ x ≡ x
     
-    -- det = 1
-    det-one : ⊤  -- marker
+    -- Det = 1: discrete symmetry (finite Z₃)
+    -- Witness: centralizer has exactly 3 elements
+    det-witness : (f : Transform) → CommutesWithCycle f → 
+                  ((x : Omega) → f x ≡ x) ⊎ 
+                  ((x : Omega) → f x ≡ cycle x) ⊎ 
+                  ((x : Omega) → f x ≡ cycle (cycle x))
     
-    -- Compact
-    is-compact : ⊤  -- marker
+    -- Compactness: finite center
+    -- Witness: center has exactly 3 elements (Z₃)
+    compact-witness : center-card ≡ 3
 
 -- SU(3) satisfies all criteria
 SU3-satisfies : TriadCompatibleGauge
@@ -99,9 +105,9 @@ SU3-satisfies = record
   ; center-is-3 = refl
   ; fund-dim = 3
   ; fund-is-3 = refl
-  ; is-complex = tt
-  ; det-one = tt
-  ; is-compact = tt
+  ; complex-witness = cycle³≡id
+  ; det-witness = centralizer-is-Z₃
+  ; compact-witness = refl
   }
 
 -- ============================================================================

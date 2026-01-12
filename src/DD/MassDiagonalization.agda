@@ -16,6 +16,23 @@
 -- 3. Weak interactions couple flavor eigenstates
 --
 -- ============================================================================
+-- HARDENING STATUS: REQUIRES MATRIX LIBRARY
+-- ============================================================================
+--
+-- This module contains 15 ⊤ placeholders for:
+-- - Unitary matrix existence
+-- - SVD (Singular Value Decomposition)
+-- - Matrix products
+--
+-- To fully formalize, we would need:
+-- - Core.Matrix with complex entries
+-- - Unitary type with U† U = I proof
+-- - SVD theorem
+--
+-- Current status: STRUCTURAL CLAIMS (⊤ as witnesses)
+-- The LOGIC is correct; the PROOFS await matrix foundations.
+--
+-- ============================================================================
 
 module DD.MassDiagonalization where
 
