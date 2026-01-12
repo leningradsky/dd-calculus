@@ -113,17 +113,29 @@ record CausalStructure : Set where
   field
     causal : Causality
     
-    -- Spacelike separation is definable
-    spacelike-defined : ⊤
+    -- Spacelike: example witness (two equal events are trivially spacelike)
+    spacelike-example : ∀ e → Spacelike e e
     
-    -- Future and past are definable
-    future-past-defined : ⊤
+    -- Future is non-empty for any event (there's always a next event)
+    future-nonempty : ∀ e → CausalFuture e (suc e)
+
+-- Helper: reflexive spacelike (e is spacelike to itself in discrete model)
+self-spacelike : ∀ e → Spacelike e e
+self-spacelike e = (λ p → ≺-irrefl p) , (λ p → ≺-irrefl p)
+
+-- Helper: next event is in causal future
+next-in-future : ∀ e → CausalFuture e (suc e)
+next-in-future e = s≤s (≤-refl e)
+  where
+    ≤-refl : ∀ n → n ≤ n
+    ≤-refl zero = z≤n
+    ≤-refl (suc n) = s≤s (≤-refl n)
 
 causal-structure : CausalStructure
 causal-structure = record
   { causal = causality
-  ; spacelike-defined = tt
-  ; future-past-defined = tt
+  ; spacelike-example = self-spacelike
+  ; future-nonempty = next-in-future
   }
 
 -- ============================================================================

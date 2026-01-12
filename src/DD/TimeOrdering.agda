@@ -61,7 +61,62 @@ Event = ℕ
 <-asym {suc a} {suc b} (s≤s p) (s≤s q) = <-asym p q
 
 -- ============================================================================
--- SECTION 3: TIME ORDER RECORD
+-- SECTION 3: TRICHOTOMY (Total Order)
+-- ============================================================================
+
+-- Time is LINEAR: any two events are comparable.
+-- This is the key property that makes time 1-dimensional.
+
+-- Three-way comparison result
+data Tri (a b : Event) : Set where
+  tri< : a < b → ¬ (a ≡ b) → ¬ (b < a) → Tri a b
+  tri≡ : ¬ (a < b) → a ≡ b → ¬ (b < a) → Tri a b
+  tri> : ¬ (a < b) → ¬ (a ≡ b) → b < a → Tri a b
+
+-- Helper: suc is injective (for equality)
+suc-inj : ∀ {m n} → suc m ≡ suc n → m ≡ n
+suc-inj refl = refl
+
+-- Helper: suc m ≢ zero
+suc≢zero : ∀ {m} → suc m ≢ zero
+suc≢zero ()
+
+-- Helper: zero ≢ suc n
+zero≢suc : ∀ {n} → zero ≢ suc n
+zero≢suc ()
+
+-- Trichotomy for ℕ (REAL PROOF, not ⊤)
+trichotomy : ∀ (a b : Event) → Tri a b
+trichotomy zero zero = tri≡ (λ ()) refl (λ ())
+trichotomy zero (suc b) = tri< (s≤s z≤n) zero≢suc (λ ())
+trichotomy (suc a) zero = tri> (λ ()) suc≢zero (s≤s z≤n)
+trichotomy (suc a) (suc b) with trichotomy a b
+... | tri< a<b a≢b b≮a = tri< (s≤s a<b) (λ eq → a≢b (suc-inj eq)) (λ sb<sa → b≮a (suc-≤-inv sb<sa))
+  where
+    suc-≤-inv : ∀ {m n} → suc m ≤ suc n → m ≤ n
+    suc-≤-inv (s≤s p) = p
+... | tri≡ a≮b a≡b b≮a = tri≡ (λ sa<sb → a≮b (suc-≤-inv sa<sb)) (cong suc a≡b) (λ sb<sa → b≮a (suc-≤-inv sb<sa))
+  where
+    suc-≤-inv : ∀ {m n} → suc m ≤ suc n → m ≤ n
+    suc-≤-inv (s≤s p) = p
+... | tri> a≮b a≢b b<a = tri> (λ sa<sb → a≮b (suc-≤-inv sa<sb)) (λ eq → a≢b (suc-inj eq)) (s≤s b<a)
+  where
+    suc-≤-inv : ∀ {m n} → suc m ≤ suc n → m ≤ n
+    suc-≤-inv (s≤s p) = p
+
+-- Totality: simplified form using ⊎
+Total : Set
+Total = ∀ (a b : Event) → (a < b) ⊎ (a ≡ b) ⊎ (b < a)
+
+-- Derive Total from Trichotomy
+total : Total
+total a b with trichotomy a b
+... | tri< p _ _ = inj₁ p
+... | tri≡ _ p _ = inj₂ (inj₁ p)
+... | tri> _ _ p = inj₂ (inj₂ p)
+
+-- ============================================================================
+-- SECTION 4: TIME ORDER RECORD
 -- ============================================================================
 
 record TimeOrder : Set where
@@ -70,16 +125,21 @@ record TimeOrder : Set where
     irreflexive : ∀ {e} → ¬ (e < e)
     transitive : ∀ {a b c} → a < b → b < c → a < c
     asymmetric : ∀ {a b} → a < b → ¬ (b < a)
+    
+    -- TOTALITY: time is LINEAR (1-dimensional)
+    -- This is a REAL theorem, not ⊤
+    linear : Total
 
 time-order : TimeOrder
 time-order = record
   { irreflexive = <-irrefl
   ; transitive = <-trans
   ; asymmetric = <-asym
+  ; linear = total
   }
 
 -- ============================================================================
--- SECTION 4: ARROW OF TIME
+-- SECTION 5: ARROW OF TIME
 -- ============================================================================
 
 -- The "arrow of time" is the fact that there is a DIRECTION to the order.
@@ -124,7 +184,7 @@ arrow-of-time = record
   }
 
 -- ============================================================================
--- SECTION 5: INTERPRETATION
+-- SECTION 6: INTERPRETATION
 -- ============================================================================
 
 {-
