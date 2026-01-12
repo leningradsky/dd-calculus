@@ -27,6 +27,7 @@ import Distinction.ForcingDyad as ForcingD
 import Distinction.ForcingMonad as ForcingM
 import Distinction.GaugeFromDistinction as GFD
 import Core.OmegaTriadic as OmegaTriadic
+import DD.DerivationChain as Chain
 
 -- Gauge group uniqueness
 import DD.SU3Unique as SU3
