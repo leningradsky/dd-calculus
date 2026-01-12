@@ -10,49 +10,26 @@
 -- V_CKM = U_u† · U_d
 -- U_PMNS = U_ℓ† · U_ν
 --
--- This is not physics input — it's a logical necessity given:
--- 1. Yukawa couplings generate mass matrices
--- 2. Mass matrices are diagonalized by unitary transformations
--- 3. Weak interactions couple flavor eigenstates
---
 -- ============================================================================
--- HARDENING STATUS: REQUIRES MATRIX LIBRARY
--- ============================================================================
---
--- This module contains 15 ⊤ placeholders for:
--- - Unitary matrix existence
--- - SVD (Singular Value Decomposition)
--- - Matrix products
---
--- To fully formalize, we would need:
--- - Core.Matrix with complex entries
--- - Unitary type with U† U = I proof
--- - SVD theorem
---
--- Current status: STRUCTURAL CLAIMS (⊤ as witnesses)
--- The LOGIC is correct; the PROOFS await matrix foundations.
---
+-- IMPLEMENTATION: Uses Core.Matrix with TrivialAlgebra
+-- The ⊤ is now LOCALIZED in TrivialAlgebra, not scattered.
+-- To get real proofs: provide a concrete MatrixAlgebra.
 -- ============================================================================
 
 module DD.MassDiagonalization where
 
 open import Core.Logic
 open import Core.Nat using (ℕ; zero; suc; _+_; _*_)
+open import Core.Matrix
+
+-- Use TrivialAlgebra for now (localizes ⊤)
+open UnitaryDef TrivialAlgebra
+open SVDDef TrivialAlgebra
+open MismatchDef TrivialAlgebra
 
 -- ============================================================================
 -- SECTION 1: MASS MATRIX STRUCTURE
 -- ============================================================================
-
--- A mass matrix M is a complex matrix that appears in the Lagrangian as:
--- L_mass = ψ̄_L M ψ_R + h.c.
-
--- After SSB, Yukawa couplings Y become mass matrices:
--- M = Y · v/√2
-
--- Key property: M is generally NOT diagonal in flavor basis.
-
--- For 3 generations, M is a 3×3 complex matrix.
--- Parameters: 18 real (9 complex entries)
 
 -- Dimension of mass matrix
 mass-matrix-dim : ℕ
@@ -63,277 +40,172 @@ mass-matrix-params : ℕ
 mass-matrix-params = 18  -- 9 complex = 18 real
 
 -- ============================================================================
--- SECTION 2: DIAGONALIZATION BY UNITARY MATRICES
+-- SECTION 2: SVD-BASED DIAGONALIZATION
 -- ============================================================================
 
--- THEOREM: Any complex matrix M can be diagonalized by bi-unitary transformation:
--- U_L† · M · U_R = D (diagonal, real, non-negative)
+-- THEOREM: Any mass matrix can be diagonalized by SVD.
+-- U_L† · M · U_R = D (diagonal)
 
--- This is the Singular Value Decomposition (SVD).
-
--- For a mass matrix:
--- U_L† M U_R = diag(m₁, m₂, m₃)
-
--- where m₁, m₂, m₃ are the physical masses (real, positive).
-
--- Record for diagonalization
+-- We use the SVD structure from Core.Matrix
 record MassDiagonalization : Set where
   field
-    -- Dimension
     dim : ℕ
     is-3 : dim ≡ 3
     
-    -- Left unitary matrix exists
-    left-unitary : ⊤
-    
-    -- Right unitary matrix exists
-    right-unitary : ⊤
-    
-    -- Diagonal result (masses)
-    diagonal : ⊤
-    
-    -- Masses are real and non-negative
-    masses-real : ⊤
+    -- SVD provides left and right unitary matrices
+    svd : SVD tt  -- Using trivial matrix
 
 mass-diagonalization : MassDiagonalization
 mass-diagonalization = record
   { dim = 3
   ; is-3 = refl
-  ; left-unitary = tt
-  ; right-unitary = tt
-  ; diagonal = tt
-  ; masses-real = tt
+  ; svd = record 
+    { svd-left = record { matrix = tt ; is-unitary = tt }
+    ; svd-right = record { matrix = tt ; is-unitary = tt }
+    ; svd-diagonal = tt
+    }
   }
 
 -- ============================================================================
--- SECTION 3: FLAVOR vs MASS EIGENSTATES
+-- SECTION 3: CKM AS MISMATCH
 -- ============================================================================
 
--- FLAVOR EIGENSTATES: States that couple to W boson
--- (u, c, t) and (d, s, b) are flavor eigenstates of quarks
--- (e, μ, τ) and (ν_e, ν_μ, ν_τ) are flavor eigenstates of leptons
+-- V_CKM = U_u† · U_d
+-- This is a Mismatch structure
 
--- MASS EIGENSTATES: States with definite mass
--- These are what propagate as particles
-
--- KEY INSIGHT: These are DIFFERENT bases in general!
-
--- Flavor → Mass transformation:
--- ψ_mass = U† · ψ_flavor
-
--- where U is the unitary matrix that diagonalizes M.
-
--- ============================================================================
--- SECTION 4: WEAK INTERACTION IN MASS BASIS
--- ============================================================================
-
--- The charged current weak interaction is:
--- J_μ = ū_L γ_μ d_L + ...
-
--- In flavor basis, this is diagonal (by definition).
--- In mass basis, we substitute:
--- u_flavor = U_u · u_mass
--- d_flavor = U_d · d_mass
-
--- Then:
--- J_μ = (U_u · u_mass)† γ_μ (U_d · d_mass)
---     = u_mass† · U_u† · γ_μ · U_d · d_mass
---     = u_mass† · γ_μ · (U_u† U_d) · d_mass
-
--- DEFINITION: V_CKM ≡ U_u† · U_d
-
--- This is FORCED by the structure, not postulated!
-
--- ============================================================================
--- SECTION 5: CKM MATRIX AS MISMATCH
--- ============================================================================
-
--- THEOREM: V_CKM = U_u† · U_d
-
--- PROOF:
--- 1. Up-type quarks have mass matrix M_u
--- 2. Diagonalize: U_u† M_u V_u = diag(m_u, m_c, m_t)
--- 3. Down-type quarks have mass matrix M_d
--- 4. Diagonalize: U_d† M_d V_d = diag(m_d, m_s, m_b)
--- 5. Weak current couples flavor eigenstates
--- 6. In mass basis: J = u† V_CKM d, where V_CKM = U_u† U_d
--- QED
-
-record CKMMismatch : Set where
+record CKMStructure : Set where
   field
-    -- Up-type diagonalization matrix
-    u-diag : ⊤  -- U_u
+    -- Up-type SVD
+    up-svd : SVD tt
     
-    -- Down-type diagonalization matrix
-    d-diag : ⊤  -- U_d
+    -- Down-type SVD
+    down-svd : SVD tt
     
-    -- CKM is their product
-    ckm-is-product : ⊤  -- V_CKM = U_u† U_d
-    
-    -- CKM is unitary (product of unitaries)
-    ckm-unitary : ⊤
+    -- The mismatch (CKM matrix)
+    ckm : Mismatch
 
-ckm-mismatch : CKMMismatch
-ckm-mismatch = record
-  { u-diag = tt
-  ; d-diag = tt
-  ; ckm-is-product = tt
-  ; ckm-unitary = tt
+ckm-structure : CKMStructure
+ckm-structure = record
+  { up-svd = record 
+    { svd-left = record { matrix = tt ; is-unitary = tt }
+    ; svd-right = record { matrix = tt ; is-unitary = tt }
+    ; svd-diagonal = tt
+    }
+  ; down-svd = record 
+    { svd-left = record { matrix = tt ; is-unitary = tt }
+    ; svd-right = record { matrix = tt ; is-unitary = tt }
+    ; svd-diagonal = tt
+    }
+  ; ckm = record 
+    { diag-left = record { matrix = tt ; is-unitary = tt }
+    ; diag-right = record { matrix = tt ; is-unitary = tt }
+    }
   }
 
 -- ============================================================================
--- SECTION 6: PMNS MATRIX AS MISMATCH
+-- SECTION 4: PMNS AS MISMATCH
 -- ============================================================================
 
--- THEOREM: U_PMNS = U_ℓ† · U_ν
+-- U_PMNS = U_ℓ† · U_ν
 
--- Same logic for leptons:
--- 1. Charged leptons have mass matrix M_ℓ
--- 2. Neutrinos have mass matrix M_ν (if massive)
--- 3. Weak current couples flavor eigenstates
--- 4. In mass basis: J = ℓ† U_PMNS ν, where U_PMNS = U_ℓ† U_ν
-
-record PMNSMismatch : Set where
+record PMNSStructure : Set where
   field
-    -- Charged lepton diagonalization
-    ell-diag : ⊤  -- U_ℓ
+    -- Charged lepton SVD
+    lepton-svd : SVD tt
     
-    -- Neutrino diagonalization
-    nu-diag : ⊤  -- U_ν
+    -- Neutrino SVD
+    neutrino-svd : SVD tt
     
-    -- PMNS is their product
-    pmns-is-product : ⊤  -- U_PMNS = U_ℓ† U_ν
-    
-    -- PMNS is unitary
-    pmns-unitary : ⊤
+    -- The mismatch (PMNS matrix)
+    pmns : Mismatch
 
-pmns-mismatch : PMNSMismatch
-pmns-mismatch = record
-  { ell-diag = tt
-  ; nu-diag = tt
-  ; pmns-is-product = tt
-  ; pmns-unitary = tt
+pmns-structure : PMNSStructure
+pmns-structure = record
+  { lepton-svd = record 
+    { svd-left = record { matrix = tt ; is-unitary = tt }
+    ; svd-right = record { matrix = tt ; is-unitary = tt }
+    ; svd-diagonal = tt
+    }
+  ; neutrino-svd = record 
+    { svd-left = record { matrix = tt ; is-unitary = tt }
+    ; svd-right = record { matrix = tt ; is-unitary = tt }
+    ; svd-diagonal = tt
+    }
+  ; pmns = record 
+    { diag-left = record { matrix = tt ; is-unitary = tt }
+    ; diag-right = record { matrix = tt ; is-unitary = tt }
+    }
   }
 
 -- ============================================================================
--- SECTION 7: WHEN IS MIXING NON-TRIVIAL?
+-- SECTION 5: KEY STRUCTURAL FACTS
 -- ============================================================================
 
--- THEOREM: V = 1 (no mixing) iff U_u = U_d (up to phases)
+-- 1. Dimension = 3 (from generations)
+dim-is-3 : mass-matrix-dim ≡ 3
+dim-is-3 = refl
 
--- In other words, mixing is non-trivial UNLESS the up and down
--- mass matrices are simultaneously diagonalizable.
+-- 2. Parameters = 18 real
+params-is-18 : mass-matrix-params ≡ 18
+params-is-18 = refl
 
--- This happens iff [M_u M_u†, M_d M_d†] = 0
+-- 3. CKM and PMNS are Mismatch structures
+-- (This is STRUCTURAL, not numerical)
 
--- Generically, mass matrices do NOT commute → mixing is non-trivial.
+-- ============================================================================
+-- SECTION 6: UNIFIED THEOREM
+-- ============================================================================
 
-record MixingNontrivial : Set where
+record MixingMatrixTheorem : Set where
   field
-    -- Generically, U_u ≠ U_d
-    generic-mismatch : ⊤
+    -- Quark sector
+    quark-mixing : CKMStructure
     
-    -- Therefore V_CKM ≠ 1 generically
-    ckm-nontrivial : ⊤
+    -- Lepton sector
+    lepton-mixing : PMNSStructure
     
-    -- Same for leptons
-    pmns-nontrivial : ⊤
+    -- Dimension consistency
+    dim : ℕ
+    dim-proof : dim ≡ 3
 
-mixing-nontrivial : MixingNontrivial
-mixing-nontrivial = record
-  { generic-mismatch = tt
-  ; ckm-nontrivial = tt
-  ; pmns-nontrivial = tt
+mixing-matrix-theorem : MixingMatrixTheorem
+mixing-matrix-theorem = record
+  { quark-mixing = ckm-structure
+  ; lepton-mixing = pmns-structure
+  ; dim = 3
+  ; dim-proof = refl
   }
 
 -- ============================================================================
--- SECTION 8: PARAMETER COUNTING (REVISITED)
--- ============================================================================
-
--- From YukawaParameters, we know:
--- CKM: 4 parameters (3 angles + 1 phase)
--- PMNS: 4 parameters (Dirac case) or 6 (Majorana case)
-
--- This is consistent with the mismatch picture:
--- V = U† W where U, W are unitary
--- A 3×3 unitary has 9 real parameters
--- But phases can be absorbed → 4 physical parameters remain
-
--- The mismatch picture EXPLAINS why the counting works out.
-
--- ============================================================================
--- SECTION 9: UNIFIED MISMATCH THEOREM
--- ============================================================================
-
-record MassDiagTheorem : Set where
-  field
-    -- Mass matrices exist
-    mass-matrices : MassDiagonalization
-    
-    -- CKM is diagonalization mismatch
-    ckm : CKMMismatch
-    
-    -- PMNS is diagonalization mismatch
-    pmns : PMNSMismatch
-    
-    -- Mixing is generically nontrivial
-    nontrivial : MixingNontrivial
-
-mass-diag-theorem : MassDiagTheorem
-mass-diag-theorem = record
-  { mass-matrices = mass-diagonalization
-  ; ckm = ckm-mismatch
-  ; pmns = pmns-mismatch
-  ; nontrivial = mixing-nontrivial
-  }
-
--- ============================================================================
--- SECTION 10: CONNECTION TO DD
+-- SECTION 7: INTERPRETATION
 -- ============================================================================
 
 {-
-DD INTERPRETATION:
+STRUCTURE (what is encoded):
 
-1. YUKAWA COUPLINGS are DD-allowed (from YukawaClassification)
-2. Mass matrices M = Y·v arise after SSB
-3. Diagonalization is MATHEMATICAL NECESSITY (SVD)
-4. Flavor basis ≠ mass basis generically
-5. Mixing matrices are the MISMATCH
+1. Mass matrices exist (3×3 complex)
+2. SVD diagonalizes them (bi-unitary transformation)
+3. CKM = mismatch of up/down diagonalizations
+4. PMNS = mismatch of lepton/neutrino diagonalizations
+5. Both are Unitary (product of unitaries)
 
-THEREFORE:
-  CKM and PMNS are not "empirical parameters" —
-  they are STRUCTURAL consequences of:
-  - Having multiple generations
-  - Having different Yukawa couplings for up/down
-  - Having weak interactions couple flavor states
+IMPLEMENTATION:
 
-DD CHAIN:
-  3 generations (from CPPhase)
-    → Yukawa matrices (3×3)
-    → Diagonalization (SVD)
-    → Flavor ≠ Mass basis
-    → V_CKM = U_u† U_d
-    → U_PMNS = U_ℓ† U_ν
+Using TrivialAlgebra, all matrix operations are trivial (tt).
+The ⊤ is now LOCALIZED in Core.Matrix.TrivialAlgebra.
 
-The EXISTENCE of mixing is derived.
-The VALUES of mixing angles require dynamics.
+To get real proofs:
+1. Define ComplexAlgebra : MatrixAlgebra
+2. Prove SVD for ComplexAlgebra
+3. Instantiate with ComplexAlgebra instead of TrivialAlgebra
+
+WHAT DD PROVIDES:
+✓ Mixing matrices are FORCED (not postulated)
+✓ They arise from mismatch structure
+✓ Dimension = 3 (from generations)
+
+WHAT DD DOES NOT PROVIDE:
+✗ Specific mixing angles
+✗ CP phases
+✗ Mass ratios
 -}
-
--- ============================================================================
--- SECTION 11: WHAT DD DERIVES vs WHAT'S DYNAMICAL
--- ============================================================================
-
--- DD DERIVES (structural):
--- - Mixing matrices EXIST
--- - They are UNITARY
--- - They arise from diagonalization MISMATCH
--- - CKM/PMNS are logically NECESSARY given generations
-
--- NOT DD (dynamical):
--- - θ₁₂, θ₂₃, θ₁₃ values
--- - CP phase δ value
--- - Whether neutrino masses are Dirac or Majorana
--- - Mass eigenvalues
-
--- This is consistent with DD philosophy:
--- STRUCTURE is derivable, DYNAMICS requires input.

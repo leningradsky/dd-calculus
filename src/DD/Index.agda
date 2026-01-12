@@ -124,7 +124,7 @@ record DDtoSM : Set where
     neutrino : Neutrino.NeutrinoStructure
     
     -- MASS DIAGONALIZATION (CKM/PMNS as mismatch)
-    diagMismatch : MassDiag.MassDiagTheorem
+    diagMismatch : MassDiag.MixingMatrixTheorem
     
     -- SPACETIME 3+1
     timeOrder : Time.ArrowOfTime
@@ -159,7 +159,7 @@ ddtoSM = record
   ; yukawaParams = YukParam.yukawa-parameter-count
   ; massH = MassH.mass-hierarchy-theorem
   ; neutrino = Neutrino.neutrino-structure
-  ; diagMismatch = MassDiag.mass-diag-theorem
+  ; diagMismatch = MassDiag.mixing-matrix-theorem
   ; timeOrder = Time.arrow-of-time
   ; spacetime = ST.spacetime31
   }
@@ -188,9 +188,9 @@ open Photon public using (PhotonMassless; photon-massless)
 open Mass public using (MassRatioTheorem; mass-ratio-theorem)
 open YukClass public using (YukawaClassification; yukawa-classification)
 open YukParam public using (YukawaParameterCount; yukawa-parameter-count)
-open MassH public using (MassHierarchyStructure; mass-hierarchy-structure)
+open MassH public using (MassHierarchyTheorem; mass-hierarchy-theorem)
 open Neutrino public using (NeutrinoStructure; neutrino-structure)
-open MassDiag public using (MassDiagTheorem; mass-diag-theorem)
+open MassDiag public using (MixingMatrixTheorem; mixing-matrix-theorem)
 open Time public using (ArrowOfTime; arrow-of-time)
 open ST public using (Spacetime31; spacetime31)
 
