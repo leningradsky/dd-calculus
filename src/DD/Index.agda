@@ -53,6 +53,8 @@ import DD.CanonicalTrace as Trace
 import DD.BetaCoefficients as Beta
 import DD.RGRunning as RG
 import DD.RGBounds as RGBnd
+import DD.RGIntegration as RGInt
+import DD.WeinbergAtMZ as WMZ
 
 -- Higgs mechanism
 import DD.YukawaInvariance as Yukawa
@@ -90,6 +92,8 @@ record DDtoSM : Set where
     -- RG RUNNING
     rg : RG.RGTheorem
     bounds : RGBnd.RGBoundsTheorem
+    rgIntegration : RGInt.RGIntegrationTheorem
+    weinbergMZ : WMZ.WeinbergAtMZTheorem
     
     -- GENERATIONS
     threegen : Gen.ThreeGenTheorem
@@ -129,6 +133,8 @@ ddtoSM = record
   ; trace = Trace.canonical-norm
   ; rg = RG.rg-theorem
   ; bounds = RGBnd.rg-bounds-theorem
+  ; rgIntegration = RGInt.rg-integration-theorem
+  ; weinbergMZ = WMZ.weinberg-at-mz-theorem
   ; threegen = Gen.three-gen-theorem
   ; mixing = Mix.unified-mixing-theorem
   ; higgsY = Yukawa.higgs-hypercharge
@@ -157,6 +163,8 @@ open Weinberg public using (GUTPrediction; gut-prediction)
 open Trace public using (CanonicalNorm; canonical-norm)
 open RG public using (RGTheorem; rg-theorem)
 open RGBnd public using (RGBoundsTheorem; rg-bounds-theorem)
+open RGInt public using (RGIntegrationTheorem; rg-integration-theorem)
+open WMZ public using (WeinbergAtMZTheorem; weinberg-at-mz-theorem)
 open Gen public using (ThreeGenTheorem; three-gen-theorem)
 open Mix public using (UnifiedMixingTheorem; unified-mixing-theorem)
 open Yukawa public using (HiggsHypercharge; higgs-hypercharge)
@@ -178,7 +186,7 @@ open MassDiag public using (MassDiagTheorem; mass-diag-theorem)
 -- ============================================================================
 
 theorem-count : ℕ
-theorem-count = 23
+theorem-count = 25
 
 {-
 THE DD → SM DERIVATION IS COMPLETE.
