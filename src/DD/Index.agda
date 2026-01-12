@@ -22,6 +22,7 @@ open import Core.Nat using (ℕ)
 import DD.Triad as T
 import DD.Dyad as D
 import DD.Monad as M
+import Distinction.ForcingTriad as Forcing
 
 -- Gauge group uniqueness
 import DD.SU3Unique as SU3
@@ -84,8 +85,11 @@ import DD.Spacetime31 as ST
 -- MASTER RECORD: The Complete DD → SM Derivation
 -- ============================================================================
 
-record DDtoSM : Set where
+record DDtoSM : Set₁ where
   field
+    -- WHY 3? (The core DD derivation)
+    forcing : Forcing.TriadicClosure Forcing.Three
+    
     -- GAUGE GROUP
     su3 : SU3.TriadCompatibleGauge
     su2 : SU2.DyadCompatibleGauge
@@ -136,7 +140,8 @@ record DDtoSM : Set where
 
 ddtoSM : DDtoSM
 ddtoSM = record
-  { su3 = SU3.SU3-satisfies
+  { forcing = Forcing.Omega-triadic
+  ; su3 = SU3.SU3-satisfies
   ; su2 = SU2.SU2-satisfies
   ; gut = Weinberg.gut-prediction
   ; trace = Trace.canonical-norm
