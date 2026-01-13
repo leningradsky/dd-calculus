@@ -41,9 +41,15 @@ MassVector (suc n) = Mass × MassVector n
 mass-nonneg : ∀ (m : Mass) → zero ≤ m
 mass-nonneg m = z≤n
 
--- THEOREM: This holds for all masses in a vector
-all-masses-nonneg : ∀ {n} (mv : MassVector n) → ⊤
-all-masses-nonneg _ = tt  -- trivial since each component is ℕ
+-- All predicate for MassVector
+All : ∀ {n} → (Mass → Set) → MassVector n → Set
+All {zero} P _ = ⊤
+All {suc n} P (m , mv) = P m × All P mv
+
+-- THEOREM: All masses in a vector are ≥ 0 (PROVEN, not ⊤)
+all-masses-nonneg : ∀ {n} (mv : MassVector n) → All (λ m → zero ≤ m) mv
+all-masses-nonneg {zero} _ = tt
+all-masses-nonneg {suc n} (m , mv) = mass-nonneg m , all-masses-nonneg mv
 
 -- Better formulation: witness type
 record NonNegMass : Set where
