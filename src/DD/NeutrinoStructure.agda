@@ -15,10 +15,16 @@ module DD.NeutrinoStructure where
 
 open import Core.Logic
 open import Core.Nat using (ℕ; zero; suc; _+_; _*_)
+open import DD.Boundary using (DynamicalChoice; dynamical)
 
 -- ============================================================================
 -- SECTION 1: DIRAC vs MAJORANA
 -- ============================================================================
+
+-- The two possible neutrino types
+data NeutrinoKind : Set where
+  dirac    : NeutrinoKind  -- conserves lepton number
+  majorana : NeutrinoKind  -- violates lepton number by 2
 
 -- DIRAC NEUTRINO:
 -- - Requires right-handed neutrino ν_R
@@ -236,8 +242,8 @@ record NeutrinoStructure : Set where
     params-are-correct : (dirac-params ≡ 7) × (majorana-params ≡ 9)
     
     -- Dirac vs Majorana is undetermined by DD
-    -- This ⊤ is INTENTIONAL: marks that DD provides no selection
-    choice-is-dynamical : ⊤
+    -- This is a DYNAMICAL CHOICE: DD provides structure, not selection
+    choice-is-dynamical : DynamicalChoice NeutrinoKind
 
 neutrino-structure : NeutrinoStructure
 neutrino-structure = record
@@ -247,7 +253,7 @@ neutrino-structure = record
   ; dirac-params = 7
   ; majorana-params = 9
   ; params-are-correct = refl , refl
-  ; choice-is-dynamical = tt  -- INTENTIONAL
+  ; choice-is-dynamical = dynamical dirac  -- experiment TBD (Majorana also valid)
   }
 
 -- ============================================================================

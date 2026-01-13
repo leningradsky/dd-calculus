@@ -20,6 +20,7 @@ open import Core.Nat using (ℕ)
 
 -- Core structure
 import DD.Foundations as Found  -- THE entry point
+import DD.Boundary as Bound     -- Structure/Dynamics boundary
 import DD.Triad as T
 import DD.Dyad as D
 import DD.Monad as M
