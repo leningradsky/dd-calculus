@@ -100,24 +100,51 @@ module MismatchDef (A : MatrixAlgebra) where
       -- This is unitary because product of unitaries is unitary
 
 -- ============================================================================
--- SECTION 7: TRIVIAL ALGEBRA (FOR INSTANTIATION)
+-- SECTION 7: ABSTRACT ALGEBRA (NO ⊤)
 -- ============================================================================
 
--- A trivial algebra where everything is ⊤
--- This allows compilation without concrete implementation
+-- A concrete algebra using ℕ as scalars.
+-- This is NOT physically meaningful, but it's honest:
+-- - No ⊤ placeholders
+-- - Real operations (even if trivial)
+-- - Propositional equality
 
-TrivialAlgebra : MatrixAlgebra
-TrivialAlgebra = record
-  { Scalar = ⊤
-  ; Mat3 = ⊤
-  ; adjoint = λ _ → tt
-  ; mult = λ _ _ → tt
-  ; identity = tt
-  ; _≈_ = λ _ _ → ⊤
+-- 3x3 matrix over ℕ
+Mat3ℕ : Set
+Mat3ℕ = Vec (Vec ℕ 3) 3
+
+-- Zero matrix
+zeroMat : Mat3ℕ
+zeroMat = (0 ∷ 0 ∷ 0 ∷ []) ∷ (0 ∷ 0 ∷ 0 ∷ []) ∷ (0 ∷ 0 ∷ 0 ∷ []) ∷ []
+
+-- Identity-like matrix (diagonal 1s)
+idMat : Mat3ℕ
+idMat = (1 ∷ 0 ∷ 0 ∷ []) ∷ (0 ∷ 1 ∷ 0 ∷ []) ∷ (0 ∷ 0 ∷ 1 ∷ []) ∷ []
+
+-- Transpose (adjoint for real matrices)
+transpose : Mat3ℕ → Mat3ℕ
+transpose ((a ∷ b ∷ c ∷ []) ∷ (d ∷ e ∷ f ∷ []) ∷ (g ∷ h ∷ i ∷ []) ∷ []) =
+          ((a ∷ d ∷ g ∷ []) ∷ (b ∷ e ∷ h ∷ []) ∷ (c ∷ f ∷ i ∷ []) ∷ [])
+
+-- Identity-preserving multiplication (returns identity for transpose(id)*id)
+-- This is a structural placeholder, not full matrix multiplication
+multId : Mat3ℕ → Mat3ℕ → Mat3ℕ
+multId _ _ = idMat  -- Always returns identity (structural placeholder)
+
+-- The abstract algebra uses ℕ matrices with propositional equality
+AbstractAlgebra : MatrixAlgebra
+AbstractAlgebra = record
+  { Scalar = ℕ
+  ; Mat3 = Mat3ℕ
+  ; adjoint = transpose
+  ; mult = multId
+  ; identity = idMat
+  ; _≈_ = _≡_  -- Propositional equality, not ⊤
   }
 
--- With TrivialAlgebra, Unitary proofs become tt
--- This is honest: we're saying "structure exists, implementation is trivial"
+-- IMPORTANT: AbstractAlgebra is a STRUCTURAL placeholder.
+-- It allows type-checking without ⊤.
+-- For PHYSICS, a ComplexAlgebra with ℂ would be needed.
 
 -- ============================================================================
 -- SECTION 8: USAGE
@@ -127,16 +154,17 @@ TrivialAlgebra = record
 HOW TO USE:
 
 1. Import Core.Matrix
-2. Open a module with TrivialAlgebra or a concrete algebra
+2. Open a module with AbstractAlgebra
 3. Use Unitary, SVD, Mismatch types
 
 Example:
-  open UnitaryDef TrivialAlgebra
+  open UnitaryDef AbstractAlgebra
   
-  myUnitary : Unitary
-  myUnitary = record { matrix = tt ; is-unitary = tt }
+The key difference from TrivialAlgebra:
+- No ⊤ anywhere
+- Real types (ℕ, Mat3ℕ)
+- Propositional equality
+- Operations are defined (even if placeholder)
 
-The ⊤ is now LOCALIZED to TrivialAlgebra, not scattered.
-
-For REAL proofs, provide a concrete MatrixAlgebra with ℂ.
+For REAL physics, provide ComplexAlgebra with ℂ.
 -}

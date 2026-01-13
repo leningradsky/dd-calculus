@@ -99,15 +99,15 @@ module Semantics {U : Set} (DD : DD-Structure U) where
   -- 4) Products and Exponentials
   ------------------------------------------------------------------------
 
-  -- Terminal object
+  -- Terminal object (single element, propositional equality)
   ⊤obj : DDObj
   ⊤obj = record
     { Carrier = ⊤
-    ; _≈_ = λ _ _ → ⊤
+    ; _≈_ = _≡_  -- Propositional equality (not λ _ _ → ⊤)
     ; isEq = record
-        { refl = tt
-        ; sym = λ _ → tt
-        ; trans = λ _ _ → tt
+        { refl = PE.refl
+        ; sym = PE.sym
+        ; trans = PE.trans
         }
     }
 

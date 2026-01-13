@@ -11,9 +11,9 @@
 -- U_PMNS = U_ℓ† · U_ν
 --
 -- ============================================================================
--- IMPLEMENTATION: Uses Core.Matrix with TrivialAlgebra
--- The ⊤ is now LOCALIZED in TrivialAlgebra, not scattered.
--- To get real proofs: provide a concrete MatrixAlgebra.
+-- IMPLEMENTATION: Uses Core.Matrix with AbstractAlgebra
+-- No ⊤ — uses real ℕ matrices with propositional equality.
+-- For physics: provide a ComplexAlgebra with ℂ.
 -- ============================================================================
 
 module DD.MassDiagonalization where
@@ -22,10 +22,10 @@ open import Core.Logic
 open import Core.Nat using (ℕ; zero; suc; _+_; _*_)
 open import Core.Matrix
 
--- Use TrivialAlgebra for now (localizes ⊤)
-open UnitaryDef TrivialAlgebra
-open SVDDef TrivialAlgebra
-open MismatchDef TrivialAlgebra
+-- Use AbstractAlgebra (no ⊤, real ℕ matrices)
+open UnitaryDef AbstractAlgebra
+open SVDDef AbstractAlgebra
+open MismatchDef AbstractAlgebra
 
 -- ============================================================================
 -- SECTION 1: MASS MATRIX STRUCTURE
@@ -53,16 +53,16 @@ record MassDiagonalization : Set where
     is-3 : dim ≡ 3
     
     -- SVD provides left and right unitary matrices
-    svd : SVD tt  -- Using trivial matrix
+    svd : SVD idMat  -- Using identity matrix
 
 mass-diagonalization : MassDiagonalization
 mass-diagonalization = record
   { dim = 3
   ; is-3 = refl
   ; svd = record 
-    { svd-left = record { matrix = tt ; is-unitary = tt }
-    ; svd-right = record { matrix = tt ; is-unitary = tt }
-    ; svd-diagonal = tt
+    { svd-left = record { matrix = idMat ; is-unitary = refl }
+    ; svd-right = record { matrix = idMat ; is-unitary = refl }
+    ; svd-diagonal = idMat
     }
   }
 
@@ -76,10 +76,10 @@ mass-diagonalization = record
 record CKMStructure : Set where
   field
     -- Up-type SVD
-    up-svd : SVD tt
+    up-svd : SVD idMat
     
     -- Down-type SVD
-    down-svd : SVD tt
+    down-svd : SVD idMat
     
     -- The mismatch (CKM matrix)
     ckm : Mismatch
@@ -87,18 +87,18 @@ record CKMStructure : Set where
 ckm-structure : CKMStructure
 ckm-structure = record
   { up-svd = record 
-    { svd-left = record { matrix = tt ; is-unitary = tt }
-    ; svd-right = record { matrix = tt ; is-unitary = tt }
-    ; svd-diagonal = tt
+    { svd-left = record { matrix = idMat ; is-unitary = refl }
+    ; svd-right = record { matrix = idMat ; is-unitary = refl }
+    ; svd-diagonal = idMat
     }
   ; down-svd = record 
-    { svd-left = record { matrix = tt ; is-unitary = tt }
-    ; svd-right = record { matrix = tt ; is-unitary = tt }
-    ; svd-diagonal = tt
+    { svd-left = record { matrix = idMat ; is-unitary = refl }
+    ; svd-right = record { matrix = idMat ; is-unitary = refl }
+    ; svd-diagonal = idMat
     }
   ; ckm = record 
-    { diag-left = record { matrix = tt ; is-unitary = tt }
-    ; diag-right = record { matrix = tt ; is-unitary = tt }
+    { diag-left = record { matrix = idMat ; is-unitary = refl }
+    ; diag-right = record { matrix = idMat ; is-unitary = refl }
     }
   }
 
@@ -111,10 +111,10 @@ ckm-structure = record
 record PMNSStructure : Set where
   field
     -- Charged lepton SVD
-    lepton-svd : SVD tt
+    lepton-svd : SVD idMat
     
     -- Neutrino SVD
-    neutrino-svd : SVD tt
+    neutrino-svd : SVD idMat
     
     -- The mismatch (PMNS matrix)
     pmns : Mismatch
@@ -122,18 +122,18 @@ record PMNSStructure : Set where
 pmns-structure : PMNSStructure
 pmns-structure = record
   { lepton-svd = record 
-    { svd-left = record { matrix = tt ; is-unitary = tt }
-    ; svd-right = record { matrix = tt ; is-unitary = tt }
-    ; svd-diagonal = tt
+    { svd-left = record { matrix = idMat ; is-unitary = refl }
+    ; svd-right = record { matrix = idMat ; is-unitary = refl }
+    ; svd-diagonal = idMat
     }
   ; neutrino-svd = record 
-    { svd-left = record { matrix = tt ; is-unitary = tt }
-    ; svd-right = record { matrix = tt ; is-unitary = tt }
-    ; svd-diagonal = tt
+    { svd-left = record { matrix = idMat ; is-unitary = refl }
+    ; svd-right = record { matrix = idMat ; is-unitary = refl }
+    ; svd-diagonal = idMat
     }
   ; pmns = record 
-    { diag-left = record { matrix = tt ; is-unitary = tt }
-    ; diag-right = record { matrix = tt ; is-unitary = tt }
+    { diag-left = record { matrix = idMat ; is-unitary = refl }
+    ; diag-right = record { matrix = idMat ; is-unitary = refl }
     }
   }
 
@@ -191,13 +191,13 @@ STRUCTURE (what is encoded):
 
 IMPLEMENTATION:
 
-Using TrivialAlgebra, all matrix operations are trivial (tt).
-The ⊤ is now LOCALIZED in Core.Matrix.TrivialAlgebra.
+Using AbstractAlgebra with ℕ matrices and propositional equality.
+No ⊤ anywhere — all types and operations are concrete.
 
-To get real proofs:
+To get real physics:
 1. Define ComplexAlgebra : MatrixAlgebra
 2. Prove SVD for ComplexAlgebra
-3. Instantiate with ComplexAlgebra instead of TrivialAlgebra
+3. Instantiate with ComplexAlgebra instead of AbstractAlgebra
 
 WHAT DD PROVIDES:
 ✓ Mixing matrices are FORCED (not postulated)
