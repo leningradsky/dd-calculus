@@ -106,8 +106,8 @@ spacetime31 : Spacetime31             -- 3+1 dimensions derived
 
 | Metric | Value |
 |--------|-------|
-| Modules | 85 |
-| Lines of Code | 12,659 |
+| Modules | 97 |
+| Lines of Code | 14,280 |
 | Postulates | **0** |
 | Intentional ⊤ | 2 |
 
