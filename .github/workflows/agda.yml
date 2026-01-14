@@ -65,8 +65,8 @@ jobs:
           mv agda-stdlib-2.1 stdlib
           rm v2.1.tar.gz
         fi
-        # Create libraries file
-        echo "$GITHUB_WORKSPACE" > ~/.agda/libraries
+        # Create libraries file - MUST point to .agda-lib FILES, not directories!
+        echo "$GITHUB_WORKSPACE/dd-calculus.agda-lib" > ~/.agda/libraries
         echo "$HOME/.agda/stdlib/standard-library.agda-lib" >> ~/.agda/libraries
         # Create defaults file
         echo "standard-library" > ~/.agda/defaults
@@ -86,6 +86,10 @@ jobs:
         fi
         echo "=== LIBRARY FILE ==="
         cat dd-calculus.agda-lib
+        echo "===================="
+        echo "=== WORKSPACE ==="
+        echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+        ls -la dd-calculus.agda-lib
         echo "===================="
 
     - name: Count modules and lines
