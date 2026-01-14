@@ -160,6 +160,26 @@ src/
 
 From these principles, the entire gauge structure of the Standard Model emerges.
 
+## Falsifiable Prediction (Patch-8)
+
+**DD predicts: No asymptotic millicharged particles outside (1/3)ℤ.**
+
+This is a *risky* prediction that can be killed by:
+- Discovering a stable particle with Q = 10⁻³ e, Q = 1/2, or any Q ∉ (1/3)ℤ
+- Confirmed kinetic mixing to non-lattice charges
+
+See `REALITY_CHECK.md` for the full falsifiability analysis.
+
+## Honesty Documents
+
+| File | Purpose |
+|------|---------|
+| `REALITY_CHECK.md` | DD claims vs physical verification |
+| `SEMANTIC_BRIDGE.md` | Code ↔ Physics mapping with explicit assumptions |
+| `ASSUMPTIONS.md` | Full ledger of DD assumptions (A1–A10) |
+
+These documents make DD a *conditional framework*, not a "theory of everything".
+
 ## References
 
 - [PhilPapers: Distinction Dynamics](https://philpapers.org/) — ~50 preprints
