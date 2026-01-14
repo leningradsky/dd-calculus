@@ -39,9 +39,9 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/.agda
-        key: ${{ runner.os }}-agda-stdlib-2.1
+        key: ${{ runner.os }}-agda-stdlib-2.1-v3
         restore-keys: |
-          ${{ runner.os }}-agda-stdlib-
+          ${{ runner.os }}-agda-stdlib-2.1-v3
 
     - name: Install Agda
       run: |
@@ -80,6 +80,11 @@ jobs:
 
     - name: Verify library file exists
       run: |
+        echo "=== DEBUG INFO ==="
+        echo "PWD: $(pwd)"
+        echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+        ls -la
+        echo ""
         if [ ! -f dd-calculus.agda-lib ]; then
           echo "ERROR: dd-calculus.agda-lib not found!"
           exit 1
@@ -87,9 +92,14 @@ jobs:
         echo "=== LIBRARY FILE ==="
         cat dd-calculus.agda-lib
         echo "===================="
-        echo "=== WORKSPACE ==="
-        echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-        ls -la dd-calculus.agda-lib
+        echo ""
+        echo "=== AGDA LIBRARIES FILE ==="
+        cat ~/.agda/libraries
+        echo "===================="
+        echo ""
+        echo "=== CHECKING PATHS ==="
+        ls -la "$GITHUB_WORKSPACE/dd-calculus.agda-lib" || echo "File not found at WORKSPACE path"
+        ls -la ~/.agda/stdlib/standard-library.agda-lib || echo "stdlib not found"
         echo "===================="
 
     - name: Count modules and lines
