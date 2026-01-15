@@ -1,7 +1,7 @@
 {-# OPTIONS --safe --without-K #-}
 
 -- =============================================================================
--- Patch-8.1b: Electric Charge Lattice Target (CONSTRUCTIVE, 0 postulates)
+-- Patch-8.2: Electric Charge Lattice Target (CONSTRUCTIVE, 0 postulates)
 -- =============================================================================
 -- 
 -- DD-EM-Lattice Theorem:
@@ -14,20 +14,30 @@
 -- 2. ChargeMinimality: all NEW charges lie in Spanℤ of SM anchors.
 --    (Then lattice follows as THEOREM, not assumption.)
 --
--- PATCH-8.1b: Fully constructive proof that Spanℤ(1/3) = (1/3)ℤ
+-- PATCH-8.2: Real CollinearOn with constructive scaleQ (no stubs)
 -- This makes millicharge a RISKY PREDICTION for DD.
 -- =============================================================================
 
 module DD.Patch8-ChargeLattice where
 
 -- =============================================================================
--- LAYER 1: Basic Types
+-- LAYER 1: Basic Types and Arithmetic
 -- =============================================================================
 
 -- Natural numbers
 data ℕ : Set where
   zero : ℕ
   suc  : ℕ → ℕ
+
+-- Addition on ℕ
+addℕ : ℕ → ℕ → ℕ
+addℕ zero n = n
+addℕ (suc m) n = suc (addℕ m n)
+
+-- Multiplication on ℕ
+mulℕ : ℕ → ℕ → ℕ
+mulℕ zero _ = zero
+mulℕ (suc m) n = addℕ n (mulℕ m n)
 
 -- Integer type
 data ℤ : Set where
@@ -65,15 +75,49 @@ _×_ : Set → Set → Set
 A × B = Σ A (λ _ → B)
 
 -- =============================================================================
--- LAYER 2: ℚ₆ Representation and Lattice
+-- LAYER 2: Integer Arithmetic (for scaleQ)
+-- =============================================================================
+
+-- Addition on ℤ
+_+ℤ_ : ℤ → ℤ → ℤ
+pos m +ℤ pos n = pos (addℕ m n)
+pos zero +ℤ negsuc n = negsuc n
+pos (suc m) +ℤ negsuc zero = pos m
+pos (suc m) +ℤ negsuc (suc n) = pos m +ℤ negsuc n
+negsuc m +ℤ pos zero = negsuc m
+negsuc zero +ℤ pos (suc n) = pos n
+negsuc (suc m) +ℤ pos (suc n) = negsuc m +ℤ pos n
+negsuc m +ℤ negsuc n = negsuc (suc (addℕ m n))
+
+-- Negation on ℤ
+negℤ : ℤ → ℤ
+negℤ (pos zero) = pos zero
+negℤ (pos (suc n)) = negsuc n
+negℤ (negsuc n) = pos (suc n)
+
+-- Multiplication of ℤ by ℕ (repeated addition)
+mulℤℕ : ℤ → ℕ → ℤ
+mulℤℕ _ zero = pos zero
+mulℤℕ z (suc n) = z +ℤ mulℤℕ z n
+
+-- Multiplication on ℤ (constructive)
+mulℤ : ℤ → ℤ → ℤ
+mulℤ z (pos n) = mulℤℕ z n
+mulℤ z (negsuc n) = negℤ (mulℤℕ z (suc n))
+
+-- =============================================================================
+-- LAYER 3: ℚ₆ Representation and Lattice
 -- =============================================================================
 
 -- Rational as numerator/6 (fixed denominator simplifies lattice check)
--- Q ∈ (1/3)ℤ iff numerator ∈ 2ℤ (because k/3 = 2k/6)
 record ℚ₆ : Set where
   constructor _/6
   field
     num : ℤ
+
+-- Scale a rational q = (num/6) by integer k: (k*num)/6
+scaleQ : ℤ → ℚ₆ → ℚ₆
+scaleQ k (n /6) = (mulℤ k n) /6
 
 -- Double a natural
 double : ℕ → ℕ
@@ -86,25 +130,28 @@ EvenWitness (pos n) = Σ ℕ (λ k → n ≡ double k)
 EvenWitness (negsuc n) = Σ ℕ (λ k → suc n ≡ double k)
 
 -- The lattice predicate: Q ∈ (1/3)ℤ
--- In ℚ₆ representation: numerator must be even
 Lattice₃ : ℚ₆ → Set
 Lattice₃ (n /6) = EvenWitness n
 
 -- =============================================================================
--- LAYER 3: Spanℤ (constructive, key for Patch-8.1b)
+-- LAYER 4: Spanℤ (constructive)
 -- =============================================================================
 
--- Double a ℤ (for defining Span)
+-- Double a ℤ
 doubleℤ : ℤ → ℤ
 doubleℤ (pos n) = pos (double n)
-doubleℤ (negsuc n) = negsuc (pred (double (suc n)))
+doubleℤ (negsuc n) = negsuc (predℕ (double (suc n)))
   where
-    pred : ℕ → ℕ
-    pred zero = zero
-    pred (suc k) = k
+    predℕ : ℕ → ℕ
+    predℕ zero = zero
+    predℕ (suc k) = k
+
+-- predℕ at top level (needed for lemmas)
+predℕ : ℕ → ℕ
+predℕ zero = zero
+predℕ (suc k) = k
 
 -- Span of 1/3 generator: q ∈ SpanThird iff ∃k, num(q) = doubleℤ k
--- Since Q-third = 2/6, we have: k * Q-third = (2k)/6 = (doubleℤ k)/6
 SpanThird : ℚ₆ → Set
 SpanThird (n /6) = Σ ℤ (λ k → n ≡ doubleℤ k)
 
@@ -188,19 +235,17 @@ stdQ p = Particle.Q p
 -- means no millicharge outside the lattice.
 
 -- Collinearity: q' is proportional to q on Obs (integer scaling)
+-- NOW REAL: uses actual scaleQ with mulℤ
 CollinearOn : ChargeFn → ChargeFn → ParticleList → Set
 CollinearOn q' q Obs = 
-  Σ ℤ (λ k → All (λ p → ℚ₆.num (q' p) ≡ ℚ₆.num (scaleQ k (q p))) Obs)
-  where
-    -- Integer scaling of ℚ₆ via doubleℤ (simplified: k=1 means identity)
-    scaleQ : ℤ → ℚ₆ → ℚ₆
-    scaleQ (pos zero) _ = pos zero /6
-    scaleQ (pos (suc zero)) q = q  -- k=1: identity
-    scaleQ k (n /6) = n /6  -- stub for other k (Rigidity not used in main proof)
+  Σ ℤ (λ k → All (λ p → q' p ≡ scaleQ k (q p)) Obs)
 
 record AbelianRigidity (Obs : ParticleList) : Set where
   field
     rigidity : (q' : ChargeFn) → CollinearOn q' stdQ Obs
+
+-- NOTE: Rigidity is still an ASSUMPTION of DDAllowed (a physics postulate),
+-- but it is now a REAL mathematical statement (no placeholders/stubs).
 
 -- -----------------------------------------------------------------------------
 -- POSTULATE 2: Charge Minimality (DD-A7 for charges) - via SpanThird
@@ -253,11 +298,6 @@ pos-inj refl = refl
 
 negsuc-inj : {m n : ℕ} → negsuc m ≡ negsuc n → m ≡ n
 negsuc-inj refl = refl
-
--- pred for ℕ
-predℕ : ℕ → ℕ
-predℕ zero = zero
-predℕ (suc m) = m
 
 -- suc-pred lemma: if n = pred (double (suc k)), then suc n = double (suc k)
 -- Note: double (suc k) = suc (suc (double k)), so pred of that = suc (double k)
@@ -316,6 +356,21 @@ SpanEqLattice₃ : (q : ℚ₆) → (SpanThird q → Lattice₃ q) × (Lattice�
 SpanEqLattice₃ q = (SpanThird→Lattice₃ , Lattice₃→SpanThird)
 
 -- =============================================================================
+-- PATCH-8.2: Rigidity implies no independent U(1)' on spectrum
+-- =============================================================================
+
+-- If rigidity holds, then any charge function q' is determined by stdQ
+-- up to integer scaling. This is the formal statement that blocks
+-- kinetic mixing to non-lattice charges.
+
+NoIndependentCharge :
+  (Obs : ParticleList) →
+  AbelianRigidity Obs →
+  (q' : ChargeFn) →
+  Σ ℤ (λ k → All (λ p → q' p ≡ scaleQ k (stdQ p)) Obs)
+NoIndependentCharge Obs rig q' = AbelianRigidity.rigidity rig q'
+
+-- =============================================================================
 -- KILL CRITERIA (Falsifiability)
 -- =============================================================================
 
@@ -331,11 +386,12 @@ CounterModel = Σ Model (λ M →
 -- SUMMARY
 -- =============================================================================
 -- 
--- Patch-8.1b achieves:
+-- Patch-8.2 achieves:
 -- 1. ChargeMinimality uses SpanThird (not Lattice₃ directly)
 -- 2. SpanThird→Lattice₃ is PROVEN constructively (no postulates)
 -- 3. Full equivalence SpanEqLattice₃ demonstrated
--- 4. AbelianRigidity has CollinearOn structure (rank-1)
+-- 4. AbelianRigidity has REAL CollinearOn with constructive scaleQ
+-- 5. NoIndependentCharge formally blocks kinetic mixing
 --
 -- The theorem Patch8-EM-Lattice is now a REAL DERIVATION:
 --   DDAllowed (with SpanThird) ⟹ Lattice₃
