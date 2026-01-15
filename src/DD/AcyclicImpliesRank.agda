@@ -1,18 +1,25 @@
 {-# OPTIONS --safe --without-K #-}
 
 -- =============================================================================
--- Tier 1, Line 4: Acyclic Graph Admits Rank (Time as Monotone Parameter)
+-- Tier 1, Line 4 (SKELETON): Acyclic Graph Admits Rank
 -- =============================================================================
 --
--- CLAIM: An acyclic dependency graph admits a rank function.
--- This rank function IS time: a monotone parameter such that
--- if a depends on b, then rank(b) < rank(a).
+-- STATUS: DEFINITIONS ONLY - NOT A COMPLETE PROOF
 --
--- Combined with Line 3: Consistency → Acyclic → Rank exists
--- Therefore: Consistency → Time exists (as evaluation order)
+-- This file contains:
+-- - Definition of Accessibility (Acc)
+-- - Definition of Well-foundedness
+-- - Definition of TimeStructure
+-- - Proof that self-loops are forbidden (acc-no-self-dep)
 --
--- This is NOT linear time. This is partial order + monotone grading.
--- Linear time requires additional assumptions (Tier 2).
+-- This file does NOT contain:
+-- - Full proof that arbitrary cycles are forbidden
+-- - Construction of rank from Acc (only stub)
+-- - Proof that WellFounded → TimeStructure
+--
+-- For the REAL Line 4 theorem, see: TimeFromConsistency.agda
+-- which proves ConsistentEval ↔ TimeStructure directly.
+--
 -- =============================================================================
 
 module DD.AcyclicImpliesRank where
